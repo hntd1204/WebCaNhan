@@ -60,3 +60,25 @@ body { background-color: var(--bg); font-family: 'Segoe UI', sans-serif; color: 
 
 /* Khi di chuột vào item-container thì hiện nút xóa */
 .item-container:hover .btn-delete-absolute { opacity: 1; }
+
+/* Thêm vào cuối file style.css */
+
+/* Toast Notification Style */
+.alert-float {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    border: none;
+    border-radius: 12px;
+    animation: slideInRight 0.5s ease forwards;
+    opacity: 1; /* Mặc định hiện */
+}
+
+/* Hiệu ứng trượt từ phải vào */
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
