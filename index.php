@@ -25,7 +25,7 @@ if (isset($_GET['msg'])) {
 
 <head>
     <meta charset="UTF-8">
-    <title>My Sweet Gallery</title>
+    <title>Album Ảnh</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
@@ -36,7 +36,7 @@ if (isset($_GET['msg'])) {
     <div class="container py-5">
 
         <div class="text-center mb-5">
-            <h1 class="fw-bold" style="color: #ffb7b2;">🌸 MY SWEET DRIVE</h1>
+            <h1 class="fw-bold" style="color: #ffb7b2;">Thành Đạt 🌸 Phương Uyên</h1>
 
             <?php if ($error_msg): ?>
             <div class="alert alert-danger mt-3"><?php echo $error_msg; ?></div>
