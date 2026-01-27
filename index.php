@@ -3,7 +3,7 @@ require_once 'functions.php';
 $current_dir = getCurrentPath();
 $error_msg = handleActions();
 
-// Xử lý thông báo
+// Thông báo
 $success_msg = "";
 if (isset($_GET['msg'])) {
     switch ($_GET['msg']) {
@@ -11,8 +11,8 @@ if (isset($_GET['msg'])) {
             $success_msg = "Tạo folder thành công! 📁";
             break;
         case 'uploaded':
-            $success_msg = "Đã tải tất cả ảnh lên! 🌸";
-            break; // Đổi thông báo
+            $success_msg = "Đã tải ảnh lên! 🌸";
+            break;
         case 'deleted':
             $success_msg = "Đã xóa! 🗑️";
             break;
@@ -25,6 +25,7 @@ if (isset($_GET['msg'])) {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Gallery</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -42,14 +43,14 @@ if (isset($_GET['msg'])) {
             class="fa-solid fa-circle-check me-2"></i> <?php echo $success_msg; ?></div>
     <?php endif; ?>
 
-    <div class="container py-5">
-        <div class="text-center mb-5">
+    <div class="container py-4 py-md-5">
+        <div class="text-center mb-4">
             <h1 class="fw-bold" style="color: #ffb7b2;">Thành Đạt 🌸 Phương Uyên</h1>
         </div>
 
-        <div class="glass-panel p-4 mb-4">
+        <div class="glass-panel p-3 p-md-4 mb-4">
             <div class="row g-3">
-                <div class="col-md-6 border-end">
+                <div class="col-md-6 border-end-md">
                     <form method="POST" class="d-flex gap-2">
                         <input type="text" name="folder_name" class="form-control rounded-pill"
                             placeholder="Tên folder..." required>
@@ -57,6 +58,7 @@ if (isset($_GET['msg'])) {
                                 class="fa-solid fa-plus"></i> Tạo</button>
                     </form>
                 </div>
+
                 <div class="col-md-6">
                     <form method="POST" enctype="multipart/form-data" class="d-flex gap-2">
                         <input type="file" name="file_upload[]" class="form-control rounded-pill" multiple required>
@@ -70,7 +72,7 @@ if (isset($_GET['msg'])) {
         </div>
 
         <nav class="mb-4">
-            <div class="bg-white px-4 py-2 rounded-pill d-inline-block shadow-sm">
+            <div class="bg-white px-3 py-2 rounded-pill shadow-sm breadcrumb-scroll">
                 <a href="index.php" class="text-decoration-none text-secondary"><i class="fa-solid fa-house"></i>
                     Home</a>
                 <?php
@@ -85,22 +87,21 @@ if (isset($_GET['msg'])) {
             </div>
         </nav>
 
-        <div class="row g-4">
-            <?php
-            $items = getFiles($current_dir);
-            if (empty($items)) echo "<div class='text-center py-5 text-muted'>Trống trơn... 🌱</div>";
+        <div class="row g-3 g-md-4"> <?php
+                                        $items = getFiles($current_dir);
+                                        if (empty($items)) echo "<div class='text-center py-5 text-muted'>Trống trơn... 🌱</div>";
 
-            foreach ($items as $item) {
-                $full_path = $current_dir . $item;
+                                        foreach ($items as $item) {
+                                            $full_path = $current_dir . $item;
 
-                if (is_dir($full_path)) {
-                    $link_folder = '?dir=' . urlencode($full_path . '/');
-                    echo "
+                                            if (is_dir($full_path)) {
+                                                $link_folder = '?dir=' . urlencode($full_path . '/');
+                                                echo "
                 <div class='col-6 col-md-3'>
                     <div class='item-container folder-box position-relative'>
                         <a href='$link_folder' class='text-decoration-none text-dark d-block'>
-                            <div style='font-size: 3rem; color: #ffdac1;'><i class='fa-solid fa-folder'></i></div>
-                            <div class='fw-bold mt-2 text-truncate'>$item</div>
+                            <div style='font-size: 2.5rem; color: #ffdac1;'><i class='fa-solid fa-folder'></i></div>
+                            <div class='fw-bold mt-2 text-truncate small'>$item</div>
                         </a>
                         <form method='POST' onsubmit=\"return confirm('Xóa folder này?');\">
                             <input type='hidden' name='delete_path' value='$full_path'>
@@ -108,14 +109,14 @@ if (isset($_GET['msg'])) {
                         </form>
                     </div>
                 </div>";
-                } else {
-                    $img_parts = explode('/', $full_path);
-                    $img_encoded = array_map('rawurlencode', $img_parts);
-                    $img_url = implode('/', $img_encoded);
+                                            } else {
+                                                $img_parts = explode('/', $full_path);
+                                                $img_encoded = array_map('rawurlencode', $img_parts);
+                                                $img_url = implode('/', $img_encoded);
 
-                    $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
-                    if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                        echo "
+                                                $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
+                                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                                    echo "
                     <div class='col-6 col-md-4 col-lg-3'>
                         <div class='item-container img-box position-relative'>
                             <img src='$img_url' alt='$item' loading='lazy'>
@@ -126,15 +127,16 @@ if (isset($_GET['msg'])) {
                             </form>
                         </div>
                     </div>";
-                    }
-                }
-            }
-            ?>
+                                                }
+                                            }
+                                        }
+                                        ?>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+    // Giữ nguyên đoạn script JS cũ của bạn ở đây
     document.addEventListener('DOMContentLoaded', function() {
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(function(alert) {
