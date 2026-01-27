@@ -3,7 +3,7 @@ require_once 'functions.php';
 $current_dir = getCurrentPath();
 $error_msg = handleActions();
 
-// Xử lý thông báo thành công
+// Xử lý thông báo
 $success_msg = "";
 if (isset($_GET['msg'])) {
     switch ($_GET['msg']) {
@@ -11,8 +11,8 @@ if (isset($_GET['msg'])) {
             $success_msg = "Tạo folder thành công! 📁";
             break;
         case 'uploaded':
-            $success_msg = "Up ảnh thành công! 🌸";
-            break;
+            $success_msg = "Đã tải tất cả ảnh lên! 🌸";
+            break; // Đổi thông báo
         case 'deleted':
             $success_msg = "Đã xóa! 🗑️";
             break;
@@ -34,20 +34,17 @@ if (isset($_GET['msg'])) {
 <body>
 
     <?php if ($error_msg): ?>
-    <div class="alert alert-danger alert-float">
-        <i class="fa-solid fa-circle-exclamation me-2"></i> <?php echo $error_msg; ?>
-    </div>
+    <div class="alert alert-danger alert-float"><i class="fa-solid fa-circle-exclamation me-2"></i>
+        <?php echo $error_msg; ?></div>
     <?php endif; ?>
-
     <?php if ($success_msg): ?>
-    <div class="alert alert-success alert-float" style="background:#e2f0cb; color:#5c7c59;">
-        <i class="fa-solid fa-circle-check me-2"></i> <?php echo $success_msg; ?>
-    </div>
+    <div class="alert alert-success alert-float" style="background:#e2f0cb; color:#5c7c59;"><i
+            class="fa-solid fa-circle-check me-2"></i> <?php echo $success_msg; ?></div>
     <?php endif; ?>
 
     <div class="container py-5">
         <div class="text-center mb-5">
-            <h1 class="fw-bold" style="color: #ffb7b2;">🌸 MY SWEET DRIVE</h1>
+            <h1 class="fw-bold" style="color: #ffb7b2;">Thành Đạt 🌸 Phương Uyên</h1>
         </div>
 
         <div class="glass-panel p-4 mb-4">
@@ -62,7 +59,7 @@ if (isset($_GET['msg'])) {
                 </div>
                 <div class="col-md-6">
                     <form method="POST" enctype="multipart/form-data" class="d-flex gap-2">
-                        <input type="file" name="file_upload" class="form-control rounded-pill" required>
+                        <input type="file" name="file_upload[]" class="form-control rounded-pill" multiple required>
                         <button class="btn btn-primary rounded-pill text-nowrap"
                             style="background-color: #a2d2ff; border:none;">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
@@ -81,7 +78,7 @@ if (isset($_GET['msg'])) {
                 $temp_path = ROOT_FOLDER;
                 foreach ($parts as $part) {
                     $temp_path .= $part . '/';
-                    $link_safe = urlencode($temp_path); // Urlencode để fix lỗi khoảng trắng
+                    $link_safe = urlencode($temp_path);
                     echo " <span class='text-muted mx-1'>/</span> <a href='?dir=$link_safe' class='text-decoration-none fw-bold' style='color: #ffb7b2;'>$part</a>";
                 }
                 ?>
@@ -112,7 +109,6 @@ if (isset($_GET['msg'])) {
                     </div>
                 </div>";
                 } else {
-                    // Xử lý link ảnh (Fix lỗi khoảng trắng/Tiếng Việt trong src)
                     $img_parts = explode('/', $full_path);
                     $img_encoded = array_map('rawurlencode', $img_parts);
                     $img_url = implode('/', $img_encoded);
@@ -138,28 +134,18 @@ if (isset($_GET['msg'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
-    // Chờ web tải xong
     document.addEventListener('DOMContentLoaded', function() {
-        // Tìm tất cả các thông báo có class .alert
         const alerts = document.querySelectorAll('.alert');
-
         alerts.forEach(function(alert) {
-            // Đợi 3 giây (3000ms)
             setTimeout(function() {
-                // Thêm hiệu ứng mờ dần
                 alert.style.transition = "opacity 0.5s ease";
                 alert.style.opacity = "0";
-
-                // Sau khi mờ xong (0.5s) thì xóa hẳn khỏi HTML
                 setTimeout(function() {
                     alert.remove();
                 }, 500);
-            }, 3000); // <-- Bạn có thể sửa 3000 thành 5000 nếu muốn hiện 5 giây
+            }, 3000);
         });
-
-        // Bonus: Xóa tham số ?msg=... trên thanh địa chỉ để F5 không hiện lại thông báo cũ
         if (window.history.replaceState) {
             const url = new URL(window.location);
             url.searchParams.delete('msg');
@@ -167,7 +153,6 @@ if (isset($_GET['msg'])) {
         }
     });
     </script>
-
 </body>
 
 </html>

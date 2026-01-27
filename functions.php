@@ -5,21 +5,16 @@ if (!is_dir(ROOT_FOLDER)) {
     mkdir(ROOT_FOLDER, 0777, true);
 }
 
-// 1. Hàm lấy đường dẫn (Cần giải mã URL vì trên link nó bị mã hóa)
 function getCurrentPath()
 {
     $dir = isset($_GET['dir']) ? urldecode($_GET['dir']) : ROOT_FOLDER;
-
     if (substr($dir, -1) !== '/') $dir .= '/';
-
-    // Bảo mật
     if (strpos($dir, ROOT_FOLDER) !== 0 || strpos($dir, '..') !== false) {
         return ROOT_FOLDER;
     }
     return $dir;
 }
 
-// 2. Hàm xóa đệ quy
 function deleteRecursive($path)
 {
     if (is_dir($path)) {
@@ -36,57 +31,61 @@ function deleteRecursive($path)
     return false;
 }
 
-// 3. Hàm xử lý chính
 function handleActions()
 {
     $current_dir = getCurrentPath();
 
-    // A. TẠO THƯ MỤC (GIỮ NGUYÊN TÊN, CHỈ LỌC KÝ TỰ CẤM CỦA WINDOWS)
+    // A. TẠO THƯ MỤC
     if (isset($_POST['create_folder'])) {
         $raw_name = trim($_POST['folder_name']);
-
-        // Loại bỏ các ký tự đặc biệt khiến hệ điều hành lỗi: \ / : * ? " < > |
         $folder_name = str_replace(array('\\', '/', ':', '*', '?', '"', '<', '>', '|'), '', $raw_name);
 
         if (!empty($folder_name)) {
             $new_path = $current_dir . $folder_name . '/';
-
             if (!is_dir($new_path)) {
-                // Trên Windows XAMPP đôi khi cần iconv để xử lý tiếng Việt, nhưng thử mkdir chuẩn trước
                 if (mkdir($new_path, 0777, true)) {
-                    // Redirect cần urlencode đường dẫn để không lỗi khoảng trắng
                     header("Location: index.php?dir=" . urlencode($current_dir) . "&msg=created");
                     exit;
-                } else {
-                    return "Lỗi: Không thể tạo thư mục (Có thể do tên chứa ký tự lạ hoặc lỗi quyền).";
                 }
-            } else {
-                return "Thư mục này đã tồn tại!";
             }
         }
     }
 
-    // B. UPLOAD ẢNH (GIỮ NGUYÊN TÊN FILE GỐC)
-    if (isset($_FILES['file_upload']) && $_FILES['file_upload']['error'] == 0) {
-        $file = $_FILES['file_upload'];
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
+    // B. UPLOAD NHIỀU ẢNH (LOGIC MỚI)
+    if (isset($_FILES['file_upload'])) {
+        $count = count($_FILES['file_upload']['name']); // Đếm số file được chọn
+        $success_count = 0;
 
-        if (in_array($ext, $allowed)) {
-            // Lấy tên gốc, chỉ bỏ ký tự cấm
-            $name_only = pathinfo($file['name'], PATHINFO_FILENAME);
-            $clean_name = str_replace(array('\\', '/', ':', '*', '?', '"', '<', '>', '|'), '', $name_only);
+        // Chạy vòng lặp xử lý từng file
+        for ($i = 0; $i < $count; $i++) {
+            // Kiểm tra lỗi của từng file
+            if ($_FILES['file_upload']['error'][$i] == 0) {
+                $raw_name = $_FILES['file_upload']['name'][$i];
+                $tmp_name = $_FILES['file_upload']['tmp_name'][$i];
 
-            // Thêm số ngẫu nhiên để tránh trùng nhưng vẫn giữ tên đẹp
-            $filename = $clean_name . '_' . time() . '.' . $ext;
-            $dest = $current_dir . $filename;
+                $ext = strtolower(pathinfo($raw_name, PATHINFO_EXTENSION));
+                $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'];
 
-            if (move_uploaded_file($file['tmp_name'], $dest)) {
-                header("Location: index.php?dir=" . urlencode($current_dir) . "&msg=uploaded");
-                exit;
+                if (in_array($ext, $allowed)) {
+                    // Làm sạch tên file
+                    $name_only = pathinfo($raw_name, PATHINFO_FILENAME);
+                    $clean_name = str_replace(array('\\', '/', ':', '*', '?', '"', '<', '>', '|'), '', $name_only);
+
+                    // Tạo tên file mới
+                    $filename = $clean_name . '_' . time() . '_' . $i . '.' . $ext; // Thêm $i để tránh trùng nếu up nhiều ảnh cùng tên
+                    $dest = $current_dir . $filename;
+
+                    if (move_uploaded_file($tmp_name, $dest)) {
+                        $success_count++;
+                    }
+                }
             }
-        } else {
-            return "Chỉ hỗ trợ file ảnh.";
+        }
+
+        // Nếu có ít nhất 1 file up thành công
+        if ($success_count > 0) {
+            header("Location: index.php?dir=" . urlencode($current_dir) . "&msg=uploaded");
+            exit;
         }
     }
 
