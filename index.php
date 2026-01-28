@@ -1,7 +1,7 @@
 <?php
-require_once 'functions.php';
+require_once 'functions.php'; // Đã bao gồm db.php
 $current_dir = getCurrentPath();
-$error_msg = handleActions();
+$error_msg = handleActions($conn); // Truyền biến kết nối $conn
 
 // Thông báo
 $success_msg = "";
@@ -26,45 +26,37 @@ if (isset($_GET['msg'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Gallery</title>
+    <title>My Gallery (SQL Ver)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
-    <?php if ($error_msg): ?>
-    <div class="alert alert-danger alert-float"><i class="fa-solid fa-circle-exclamation me-2"></i>
-        <?php echo $error_msg; ?></div>
-    <?php endif; ?>
     <?php if ($success_msg): ?>
-    <div class="alert alert-success alert-float" style="background:#e2f0cb; color:#5c7c59;"><i
-            class="fa-solid fa-circle-check me-2"></i> <?php echo $success_msg; ?></div>
+    <div class="alert alert-success alert-float"><?php echo $success_msg; ?></div>
     <?php endif; ?>
 
-    <div class="container py-4 py-md-5">
+    <div class="container py-4">
         <div class="text-center mb-4">
-            <h1 class="fw-bold" style="color: #ffb7b2;">Thành Đạt 🌸 Phương Uyên</h1>
+            <h1 class="fw-bold" style="color: #ffb7b2;">Gallery Manager 🌸</h1>
         </div>
 
-        <div class="glass-panel p-3 p-md-4 mb-4">
-            <div class="row g-3">
-                <div class="col-md-6 border-end-md">
+        <div class="glass-panel p-3 mb-4">
+            <div class="row g-2">
+                <div class="col-md-6">
                     <form method="POST" class="d-flex gap-2">
                         <input type="text" name="folder_name" class="form-control rounded-pill"
-                            placeholder="Tên folder..." required>
-                        <button name="create_folder" class="btn btn-custom rounded-pill text-nowrap"><i
-                                class="fa-solid fa-plus"></i> Tạo</button>
+                            placeholder="Tên folder mới..." required>
+                        <button name="create_folder" class="btn btn-custom rounded-pill text-nowrap">Tạo Folder</button>
                     </form>
                 </div>
-
                 <div class="col-md-6">
                     <form method="POST" enctype="multipart/form-data" class="d-flex gap-2">
                         <input type="file" name="file_upload[]" class="form-control rounded-pill" multiple required>
                         <button class="btn btn-primary rounded-pill text-nowrap"
-                            style="background-color: #a2d2ff; border:none;">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Tải lên
+                            style="background:#a2d2ff; border:none;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload
                         </button>
                     </form>
                 </div>
@@ -72,7 +64,7 @@ if (isset($_GET['msg'])) {
         </div>
 
         <nav class="mb-4">
-            <div class="bg-white px-3 py-2 rounded-pill shadow-sm breadcrumb-scroll">
+            <div class="bg-white px-3 py-2 rounded-pill shadow-sm">
                 <a href="index.php" class="text-decoration-none text-secondary"><i class="fa-solid fa-house"></i>
                     Home</a>
                 <?php
@@ -80,28 +72,25 @@ if (isset($_GET['msg'])) {
                 $temp_path = ROOT_FOLDER;
                 foreach ($parts as $part) {
                     $temp_path .= $part . '/';
-                    $link_safe = urlencode($temp_path);
-                    echo " <span class='text-muted mx-1'>/</span> <a href='?dir=$link_safe' class='text-decoration-none fw-bold' style='color: #ffb7b2;'>$part</a>";
+                    echo " <span class='text-muted'>/</span> <a href='?dir=" . urlencode($temp_path) . "' class='fw-bold' style='color: #ffb7b2;'>$part</a>";
                 }
                 ?>
             </div>
         </nav>
 
-        <div class="row g-3 g-md-4"> <?php
-                                        $items = getFiles($current_dir);
-                                        if (empty($items)) echo "<div class='text-center py-5 text-muted'>Trống trơn... 🌱</div>";
-
-                                        foreach ($items as $item) {
-                                            $full_path = $current_dir . $item;
-
-                                            if (is_dir($full_path)) {
-                                                $link_folder = '?dir=' . urlencode($full_path . '/');
-                                                echo "
+        <div class="row g-3">
+            <?php
+            // 1. HIỂN THỊ FOLDER (Từ ổ cứng)
+            $subFolders = getSubFolders($current_dir);
+            foreach ($subFolders as $folder) {
+                $full_path = $current_dir . $folder;
+                $link_folder = '?dir=' . urlencode($full_path . '/');
+                echo "
                 <div class='col-6 col-md-3'>
                     <div class='item-container folder-box position-relative'>
                         <a href='$link_folder' class='text-decoration-none text-dark d-block'>
                             <div style='font-size: 2.5rem; color: #ffdac1;'><i class='fa-solid fa-folder'></i></div>
-                            <div class='fw-bold mt-2 text-truncate small'>$item</div>
+                            <div class='fw-bold mt-2 text-truncate small'>$folder</div>
                         </a>
                         <form method='POST' onsubmit=\"return confirm('Xóa folder này?');\">
                             <input type='hidden' name='delete_path' value='$full_path'>
@@ -109,51 +98,46 @@ if (isset($_GET['msg'])) {
                         </form>
                     </div>
                 </div>";
-                                            } else {
-                                                $img_parts = explode('/', $full_path);
-                                                $img_encoded = array_map('rawurlencode', $img_parts);
-                                                $img_url = implode('/', $img_encoded);
+            }
 
-                                                $ext = strtolower(pathinfo($item, PATHINFO_EXTENSION));
-                                                if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                                                    echo "
-                    <div class='col-6 col-md-4 col-lg-3'>
+            // 2. HIỂN THỊ ẢNH (Từ Database SQL)
+            $files = getFilesFromDB($conn, $current_dir);
+            if ($files->num_rows > 0) {
+                while ($row = $files->fetch_assoc()) {
+                    $file_path = $row['file_path'];
+                    $file_name = $row['name'];
+
+                    // Xử lý URL ảnh để hiển thị đúng
+                    $img_parts = explode('/', $file_path);
+                    $img_encoded = array_map('rawurlencode', $img_parts);
+                    $img_url = implode('/', $img_encoded);
+
+                    echo "
+                    <div class='col-6 col-md-3'>
                         <div class='item-container img-box position-relative'>
-                            <img src='$img_url' alt='$item' loading='lazy'>
-                            <div class='p-2 text-center small text-muted text-truncate bg-white'>$item</div>
+                            <img src='$img_url' loading='lazy'>
+                            <div class='p-2 text-center small text-muted text-truncate'>$file_name</div>
                             <form method='POST' onsubmit=\"return confirm('Xóa ảnh này?');\">
-                                <input type='hidden' name='delete_path' value='$full_path'>
+                                <input type='hidden' name='delete_path' value='$file_path'>
                                 <button type='submit' name='delete_item' class='btn-delete-absolute'><i class='fa-solid fa-trash'></i></button>
                             </form>
                         </div>
                     </div>";
-                                                }
-                                            }
-                                        }
-                                        ?>
+                }
+            } else if (empty($subFolders)) {
+                echo "<div class='col-12 text-center text-muted py-5'>Chưa có ảnh nào... 🌱</div>";
+            }
+            ?>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-    // Giữ nguyên đoạn script JS cũ của bạn ở đây
-    document.addEventListener('DOMContentLoaded', function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-            setTimeout(function() {
-                alert.style.transition = "opacity 0.5s ease";
-                alert.style.opacity = "0";
-                setTimeout(function() {
-                    alert.remove();
-                }, 500);
-            }, 3000);
-        });
-        if (window.history.replaceState) {
-            const url = new URL(window.location);
-            url.searchParams.delete('msg');
-            window.history.replaceState(null, '', url.toString());
-        }
-    });
+    // Tự động ẩn thông báo sau 3s
+    setTimeout(function() {
+        let alerts = document.querySelectorAll('.alert');
+        alerts.forEach(el => el.remove());
+    }, 3000);
     </script>
 </body>
 
