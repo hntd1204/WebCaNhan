@@ -5,6 +5,7 @@ require 'db.php';
 $locations = [
     'Hồ Chí Minh' => [
         'Quận 1',
+        'Quận 2',
         'Quận 3',
         'Quận 4',
         'Quận 5',
