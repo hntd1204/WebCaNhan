@@ -1,32 +1,35 @@
 <?php
 require 'db.php';
 
-// --- DANH SÁCH QUẬN (TP.HCM) ---
-$districts = [
-    'Quận 1',
-    'Quận 2',
-    'Quận 3',
-    'Quận 4',
-    'Quận 5',
-    'Quận 6',
-    'Quận 7',
-    'Quận 8',
-    'Quận 10',
-    'Quận 11',
-    'Quận 12',
-    'Bình Thạnh',
-    'Gò Vấp',
-    'Phú Nhuận',
-    'Tân Bình',
-    'Tân Phú',
-    'Bình Tân',
-    'TP. Thủ Đức',
-    'Huyện Bình Chánh',
-    'Huyện Hóc Môn',
-    'Huyện Nhà Bè',
-    'Huyện Củ Chi',
-    'Huyện Cần Giờ',
-    'Khác'
+// --- CẤU TRÚC DỮ LIỆU: THÀNH PHỐ => QUẬN/HUYỆN ---
+$locations = [
+    'Hồ Chí Minh' => [
+        'Quận 1',
+        'Quận 3',
+        'Quận 4',
+        'Quận 5',
+        'Quận 6',
+        'Quận 7',
+        'Quận 8',
+        'Quận 9',
+        'Quận 10',
+        'Quận 11',
+        'Quận 12',
+        'Bình Thạnh',
+        'Gò Vấp',
+        'Phú Nhuận',
+        'Tân Bình',
+        'Tân Phú',
+        'Bình Tân',
+        'TP. Thủ Đức',
+        'Huyện Bình Chánh',
+        'Huyện Hóc Môn',
+        'Huyện Nhà Bè',
+        'Huyện Củ Chi',
+        'Huyện Cần Giờ'
+    ],
+    'Bảo Lộc' => [],
+    'Vũng Tàu' => []
 ];
 
 // --- HÀM HỖ TRỢ ---
@@ -67,9 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add_place') {
         $lat = null;
         $lng = null;
-        $originalLink = $_POST['map_url']; // Link gốc người dùng nhập
+        $originalLink = $_POST['map_url'];
 
-        // Cố gắng tách toạ độ để hiện bản đồ preview
         if (!empty($originalLink)) {
             $coords = getCoordinatesFromUrl($originalLink);
             if ($coords) {
@@ -78,8 +80,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $sql = "INSERT INTO places (name, category_id, district, address, description, latitude, longitude, rating, original_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink]);
+        // Thêm city vào câu lệnh INSERT
+        $sql = "INSERT INTO places (name, category_id, city, district, address, description, latitude, longitude, rating, original_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['city'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink]);
         header("Location: index.php");
         exit;
     }
@@ -87,22 +90,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'edit_place') {
         $lat = $_POST['current_lat'];
         $lng = $_POST['current_lng'];
-        $originalLink = $_POST['map_url']; // Link mới người dùng nhập (nếu có)
+        $originalLink = $_POST['map_url'];
 
-        // Nếu người dùng nhập link mới
         if (!empty($originalLink)) {
             $coords = getCoordinatesFromUrl($originalLink);
             if ($coords) {
                 $lat = $coords['lat'];
                 $lng = $coords['lng'];
             }
-        } else {
-            // Nếu không nhập link mới thì giữ link cũ (được gửi qua hidden input hoặc lấy lại từ DB - ở đây ta đơn giản hóa là bắt buộc nhập hoặc lấy lại từ js fill)
-            // Trong logic Modal JS bên dưới, ta sẽ fill link cũ vào ô input, nên $_POST['map_url'] sẽ có giá trị cũ.
         }
 
-        $sql = "UPDATE places SET name=?, category_id=?, district=?, address=?, description=?, latitude=?, longitude=?, rating=?, original_link=? WHERE id=?";
-        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink, $_POST['id']]);
+        // Thêm city vào câu lệnh UPDATE
+        $sql = "UPDATE places SET name=?, category_id=?, city=?, district=?, address=?, description=?, latitude=?, longitude=?, rating=?, original_link=? WHERE id=?";
+        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['city'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink, $_POST['id']]);
         header("Location: index.php");
         exit;
     }
@@ -121,9 +121,14 @@ $cats = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO:
 // Query Lọc
 $sqlPlace = "SELECT places.*, categories.name as category_name FROM places LEFT JOIN categories ON places.category_id = categories.id WHERE 1=1";
 $params = [];
+$filterCity = $_GET['filter_city'] ?? '';
 $filterDistrict = $_GET['filter_district'] ?? '';
 $filterCategory = $_GET['filter_category'] ?? '';
 
+if (!empty($filterCity)) {
+    $sqlPlace .= " AND places.city = ?";
+    $params[] = $filterCity;
+}
 if (!empty($filterDistrict)) {
     $sqlPlace .= " AND places.district = ?";
     $params[] = $filterDistrict;
@@ -187,30 +192,36 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <label for="floatingName">Tên địa điểm / Quán ăn</label>
                                 </div>
 
+                                <div class="form-floating mb-3">
+                                    <select name="category_id" class="form-select" id="floatingCat">
+                                        <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
+                                            <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
+                                    </select>
+                                    <label for="floatingCat">Danh mục</label>
+                                    <div class="position-absolute top-50 end-0 translate-middle-y me-2">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="modal"
+                                            data-bs-target="#catModal"><i class="bi bi-gear"></i></button>
+                                    </div>
+                                </div>
+
                                 <div class="row g-2 mb-3">
                                     <div class="col-12 col-md-6">
-                                        <div class="input-group h-100">
-                                            <div class="form-floating flex-grow-1">
-                                                <select name="category_id" class="form-select" id="floatingCat">
-                                                    <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
-                                                        <?= htmlspecialchars($cat['name']) ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
-                                                <label for="floatingCat">Danh mục</label>
-                                            </div>
-                                            <button class="btn btn-light border" type="button" data-bs-toggle="modal"
-                                                data-bs-target="#catModal" style="border-left:0;"><i
-                                                    class="bi bi-gear text-secondary"></i></button>
+                                        <div class="form-floating">
+                                            <select name="city" class="form-select" id="add_city"
+                                                onchange="updateDistricts('add_city', 'add_district')">
+                                                <?php foreach (array_keys($locations) as $city): ?>
+                                                <option value="<?= $city ?>"><?= $city ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <label>Thành phố</label>
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
                                         <div class="form-floating">
-                                            <select name="district" class="form-select" id="floatingDist">
-                                                <option value="">-- Chọn --</option>
-                                                <?php foreach ($districts as $d): ?><option value="<?= $d ?>"><?= $d ?>
-                                                </option><?php endforeach; ?>
+                                            <select name="district" class="form-select" id="add_district">
+                                                <option value="">-- Chọn TP trước --</option>
                                             </select>
-                                            <label for="floatingDist">Quận / Huyện</label>
+                                            <label>Quận / Huyện</label>
                                         </div>
                                     </div>
                                 </div>
@@ -219,13 +230,13 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <input type="url" name="map_url" class="form-control" id="floatingLink" required
                                         placeholder="Link Map">
                                     <label for="floatingLink"><i class="bi bi-link-45deg text-danger me-1"></i> Dán link
-                                        Google Map vào đây</label>
+                                        Google Map</label>
                                 </div>
 
                                 <div class="form-floating mb-3">
                                     <input type="text" name="address" class="form-control" id="floatingAddress"
                                         placeholder="Địa chỉ">
-                                    <label for="floatingAddress">Địa chỉ hiển thị (Số nhà, đường)</label>
+                                    <label for="floatingAddress">Địa chỉ chi tiết (Số nhà, đường)</label>
                                 </div>
 
                                 <div class="form-floating mb-3">
@@ -236,7 +247,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <option value="2">⭐⭐ (2 - Tệ)</option>
                                         <option value="1">⭐ (1 - Rất tệ)</option>
                                     </select>
-                                    <label for="floatingRating">Đánh giá trải nghiệm</label>
+                                    <label for="floatingRating">Đánh giá</label>
                                 </div>
 
                                 <div class="form-floating mb-4">
@@ -259,7 +270,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     class="filter-bar d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                     <div class="d-flex align-items-center">
                         <h5 class="mb-0 fw-bold text-dark me-3">Danh sách (<?= count($places) ?>)</h5>
-                        <?php if (!empty($filterDistrict) || !empty($filterCategory)): ?>
+                        <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory)): ?>
                         <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
                                 class="bi bi-x-lg me-1"></i> Xóa lọc</a>
                         <?php endif; ?>
@@ -269,20 +280,33 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         class="d-flex flex-column flex-md-row gap-2 flex-grow-1 flex-md-grow-0 align-items-md-center justify-content-end">
                         <div class="input-group input-group-sm flex-nowrap">
                             <span class="input-group-text bg-white border-end-0 text-secondary"><i
-                                    class="bi bi-geo-alt-fill"></i></span>
-                            <select name="filter_district" class="form-select form-select-sm border-start-0 ps-0"
-                                onchange="this.form.submit()" style="min-width: 130px;">
-                                <option value="">Tất cả Quận</option>
-                                <?php foreach ($districts as $d): ?><option value="<?= $d ?>"
-                                    <?= ($filterDistrict == $d) ? 'selected' : '' ?>><?= $d ?></option>
+                                    class="bi bi-building"></i></span>
+                            <select name="filter_city" id="filter_city"
+                                class="form-select form-select-sm border-start-0 ps-0" style="min-width: 110px;"
+                                onchange="updateDistricts('filter_city', 'filter_district'); this.form.submit()">
+                                <option value="">Tất cả TP</option>
+                                <?php foreach (array_keys($locations) as $city): ?>
+                                <option value="<?= $city ?>" <?= ($filterCity == $city) ? 'selected' : '' ?>>
+                                    <?= $city ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
+                        <div class="input-group input-group-sm flex-nowrap">
+                            <span class="input-group-text bg-white border-end-0 text-secondary"><i
+                                    class="bi bi-geo-alt-fill"></i></span>
+                            <select name="filter_district" id="filter_district"
+                                class="form-select form-select-sm border-start-0 ps-0" style="min-width: 110px;"
+                                onchange="this.form.submit()">
+                                <option value="">Tất cả Quận</option>
+                            </select>
+                        </div>
+
                         <div class="input-group input-group-sm flex-nowrap">
                             <span class="input-group-text bg-white border-end-0 text-secondary"><i
                                     class="bi bi-tags-fill"></i></span>
                             <select name="filter_category" class="form-select form-select-sm border-start-0 ps-0"
-                                onchange="this.form.submit()" style="min-width: 150px;">
+                                onchange="this.form.submit()" style="min-width: 110px;">
                                 <option value="">Tất cả Danh mục</option>
                                 <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>"
                                     <?= ($filterCategory == $cat['id']) ? 'selected' : '' ?>>
@@ -295,8 +319,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="row g-4">
                     <?php foreach ($places as $place): ?>
                     <?php
-                        // XÁC ĐỊNH LINK ĐỂ CLICK
-                        // Ưu tiên dùng link gốc (original_link). Nếu không có thì mới tự tạo link từ toạ độ.
                         $clickLink = !empty($place['original_link']) ? $place['original_link'] : "#";
                         if ($clickLink === "#" && $place['latitude']) {
                             $clickLink = "http://maps.google.com/?q=" . $place['latitude'] . "," . $place['longitude'];
@@ -323,7 +345,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <span>Chưa có bản đồ</span>
                                 </div>
                                 <?php endif; ?>
-
                                 <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
                                     class="stretched-link"></a>
                             </div>
@@ -333,11 +354,12 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <div>
                                         <span
                                             class="badge bg-info mb-2"><?= htmlspecialchars($place['category_name'] ?? 'Khác') ?></span>
-                                        <?php if (!empty($place['district'])): ?><span
-                                            class="badge bg-light text-dark border ms-1"><?= htmlspecialchars($place['district']) ?></span><?php endif; ?>
+                                        <span class="badge bg-light text-dark border ms-1">
+                                            <?= htmlspecialchars(($place['city'] == 'Hồ Chí Minh' ? 'HCM' : $place['city']) . ' - ' . $place['district']) ?>
+                                        </span>
                                     </div>
                                     <div class="text-warning small">
-                                        <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?><?= str_repeat('<i class="bi bi-star text-black-50"></i>', 5 - $place['rating']) ?>
+                                        <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?>
                                     </div>
                                 </div>
 
@@ -398,10 +420,9 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     class="form-control form-control-sm bg-white"
                                     value="<?= htmlspecialchars($cat['name']) ?>"><button type="submit"
                                     class="btn btn-sm btn-success px-3"><i class="bi bi-check-lg"></i></button></form>
-                            <form method="POST"
-                                onsubmit="return confirm('Xoá danh mục này? Các địa điểm liên quan sẽ mất danh mục.');">
-                                <input type="hidden" name="action" value="delete_category"><input type="hidden"
-                                    name="cat_id" value="<?= $cat['id'] ?>"><button type="submit"
+                            <form method="POST" onsubmit="return confirm('Xoá danh mục này?');"><input type="hidden"
+                                    name="action" value="delete_category"><input type="hidden" name="cat_id"
+                                    value="<?= $cat['id'] ?>"><button type="submit"
                                     class="btn btn-sm btn-outline-danger px-3"><i class="bi bi-trash"></i></button>
                             </form>
                         </div><?php endforeach; ?></div>
@@ -434,12 +455,19 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <?php endforeach; ?></select><label>Danh mục</label></div>
                             </div>
                             <div class="col-md-6">
+                                <div class="form-floating"><select name="city" id="edit_city" class="form-select"
+                                        onchange="updateDistricts('edit_city', 'edit_district')"><?php foreach (array_keys($locations) as $city): ?>
+                                        <option value="<?= $city ?>"><?= $city ?></option>
+                                        <?php endforeach; ?>
+                                    </select><label>Thành phố</label></div>
+                            </div>
+                            <div class="col-md-6">
                                 <div class="form-floating"><select name="district" id="edit_district"
                                         class="form-select">
-                                        <option value="">-- Chọn --</option><?php foreach ($districts as $d): ?><option
-                                            value="<?= $d ?>"><?= $d ?></option><?php endforeach; ?>
+                                        <option value="">-- Chọn --</option>
                                     </select><label>Quận / Huyện</label></div>
                             </div>
+
                             <div class="col-md-6">
                                 <div class="form-floating"><select name="rating" id="edit_rating" class="form-select">
                                         <option value="5">5 - Tuyệt vời</option>
@@ -474,7 +502,34 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
+    // 1. Dữ liệu từ PHP -> JS
+    const locationsData = <?php echo json_encode($locations); ?>;
+
+    // 2. Hàm cập nhật Quận dựa theo Thành phố
+    function updateDistricts(citySelectId, districtSelectId, selectedDistrict = null) {
+        const citySel = document.getElementById(citySelectId);
+        const distSel = document.getElementById(districtSelectId);
+        const city = citySel.value;
+
+        // Xóa cũ
+        distSel.innerHTML = '<option value="">-- Tất cả/Chọn --</option>';
+
+        if (city && locationsData[city]) {
+            locationsData[city].forEach(function(d) {
+                const option = document.createElement("option");
+                option.value = d;
+                option.text = d;
+                if (selectedDistrict && d === selectedDistrict) {
+                    option.selected = true;
+                }
+                distSel.appendChild(option);
+            });
+        }
+    }
+
+    // 3. Hàm điền dữ liệu vào Modal Sửa
     function fillEditModal(data) {
         document.getElementById('edit_id').value = data.id;
         document.getElementById('edit_name').value = data.name;
@@ -482,12 +537,32 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('edit_desc').value = data.description;
         document.getElementById('edit_rating').value = data.rating;
         document.getElementById('edit_cat').value = data.category_id;
-        document.getElementById('edit_district').value = data.district || '';
         document.getElementById('edit_lat').value = data.latitude;
         document.getElementById('edit_lng').value = data.longitude;
-        // Điền lại link gốc vào ô modal để người dùng thấy
         document.getElementById('edit_map_url').value = data.original_link || '';
+
+        // Xử lý City & District
+        const cityVal = data.city || 'Hồ Chí Minh'; // Mặc định HCM nếu null
+        document.getElementById('edit_city').value = cityVal;
+
+        // Trigger cập nhật district list rồi mới chọn district
+        updateDistricts('edit_city', 'edit_district', data.district);
     }
+
+    // 4. Khởi chạy mặc định khi load trang
+    document.addEventListener("DOMContentLoaded", function() {
+        // Form thêm mới: Mặc định chọn HCM
+        document.getElementById('add_city').value = 'Hồ Chí Minh';
+        updateDistricts('add_city', 'add_district');
+
+        // Bộ lọc: Nếu URL có sẵn city, hãy fill district tương ứng
+        const urlParams = new URLSearchParams(window.location.search);
+        const filterCity = urlParams.get('filter_city');
+        const filterDistrict = urlParams.get('filter_district');
+        if (filterCity) {
+            updateDistricts('filter_city', 'filter_district', filterDistrict);
+        }
+    });
     </script>
 </body>
 

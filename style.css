@@ -1,8 +1,8 @@
 /* =========================================
    1. FONTS & GLOBAL VARIABLES
    ========================================= */
-/* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap');
+/* Import Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
 
 :root {
     /* Bảng màu mới tươi tắn hơn */
@@ -19,13 +19,13 @@
 
 body {
     background-color: var(--bg-body);
-    font-family: 'Inter', sans-serif; /* Font cho nội dung */
+    font-family: 'Be Vietnam Pro', sans-serif;
     color: var(--dark-text);
     line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6, .navbar-brand {
-    font-family: 'Poppins', sans-serif; /* Font cho tiêu đề */
+    font-family: 'Be Vietnam Pro', sans-serif;
 }
 
 /* =========================================
