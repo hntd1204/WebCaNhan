@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Jan 29, 2026 at 04:13 PM
--- Server version: 10.11.15-MariaDB-cll-lve
--- PHP Version: 8.4.16
+-- Host: localhost
+-- Generation Time: Jan 29, 2026 at 10:35 AM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.2.4
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `thanhdat6_thanhdat`
+-- Database: `my_places_db`
 --
 
 -- --------------------------------------------------------
@@ -117,6 +117,26 @@ INSERT INTO `places` (`id`, `name`, `address`, `description`, `latitude`, `longi
 (50, 'Jua Coffee and Food', '53 Đ. Kinh Dương Vương, Phường 12, Quận 6, Thành phố Hồ Chí Minh 70000, Việt Nam', 'Mở cửa 7h-23h', 10.75196120, 106.62945850, 5, '2026-01-29 09:11:22', 2, 'Quận 6', 'https://www.google.com/maps/place/Jua+Coffee+and+Food/@10.7519612,106.6294585,17z/data=!3m1!4b1!4m6!3m5!1s0x31752fffbfc23b57:0x86252f76170b5b09!8m2!3d10.7519612!4d106.6320388!16s%2Fg%2F11vc2_c4kg?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (51, 'HẸ QUÁN - Bánh canh hẹ', '113 Cao Thắng, Phường 10, Quận 10, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h30-21h30', 10.77277460, 106.67621540, 5, '2026-01-29 09:12:21', 1, 'Quận 10', 'https://www.google.com/maps/place/H%E1%BA%B8+QU%C3%81N+-+B%C3%A1nh+canh+h%E1%BA%B9+_+B%C3%A1nh+b%C3%A8o+n%C3%B3ng+Ph%C3%BA+Y%C3%AAn/@10.7727746,106.6762154,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0715717629:0x21b050446eb31191!8m2!3d10.7727746!4d106.6787957!16s%2Fg%2F11fm_ll_mt?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL,
+  `username` varchar(50) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('admin','viewer') NOT NULL DEFAULT 'viewer'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `username`, `password`, `role`) VALUES
+(3, 'thanhdat', '$2y$10$SdxzpMpiu/gWkVXo9o56suUTVfv0010LaXlthmLh02h17aRFWqhZy', 'admin');
+
 --
 -- Indexes for dumped tables
 --
@@ -135,6 +155,13 @@ ALTER TABLE `places`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `username` (`username`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -149,6 +176,12 @@ ALTER TABLE `categories`
 --
 ALTER TABLE `places`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

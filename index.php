@@ -1,34 +1,23 @@
 <?php
+session_start();
 require 'db.php';
+
+// --- KIỂM TRA QUYỀN ---
+// Admin: Có session role = admin
+// User: Có session user_id
+$isAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+$isLoggedIn = isset($_SESSION['user_id']);
+
+// --- XỬ LÝ LOGOUT ---
+if (isset($_GET['action']) && $_GET['action'] == 'logout') {
+    session_destroy();
+    header("Location: index.php");
+    exit;
+}
 
 // --- CẤU TRÚC DỮ LIỆU: THÀNH PHỐ => QUẬN/HUYỆN ---
 $locations = [
-    'Hồ Chí Minh' => [
-        'Quận 1',
-        'Quận 2',
-        'Quận 3',
-        'Quận 4',
-        'Quận 5',
-        'Quận 6',
-        'Quận 7',
-        'Quận 8',
-        'Quận 9',
-        'Quận 10',
-        'Quận 11',
-        'Quận 12',
-        'Bình Thạnh',
-        'Gò Vấp',
-        'Phú Nhuận',
-        'Tân Bình',
-        'Tân Phú',
-        'Bình Tân',
-        'TP. Thủ Đức',
-        'Huyện Bình Chánh',
-        'Huyện Hóc Môn',
-        'Huyện Nhà Bè',
-        'Huyện Củ Chi',
-        'Huyện Cần Giờ'
-    ],
+    'Hồ Chí Minh' => ['Quận 1', 'Quận 2', 'Quận 3', 'Quận 4', 'Quận 5', 'Quận 6', 'Quận 7', 'Quận 8', 'Quận 9', 'Quận 10', 'Quận 11', 'Quận 12', 'Bình Thạnh', 'Gò Vấp', 'Phú Nhuận', 'Tân Bình', 'Tân Phú', 'Bình Tân', 'TP. Thủ Đức', 'Huyện Bình Chánh', 'Huyện Hóc Môn', 'Huyện Nhà Bè', 'Huyện Củ Chi', 'Huyện Cần Giờ'],
     'Bảo Lộc' => [],
     'Vũng Tàu' => []
 ];
@@ -43,8 +32,14 @@ function getCoordinatesFromUrl($url)
     return null;
 }
 
-// --- XỬ LÝ POST ---
+// --- XỬ LÝ POST (QUAN TRỌNG: CHẶN NẾU KHÔNG PHẢI ADMIN) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // [BẢO MẬT] Nếu không phải Admin thì dừng ngay lập tức
+    if (!$isAdmin) {
+        die("Hành động bị từ chối. Bạn không có quyền Admin.");
+    }
+
     // 1. Thêm Danh mục
     if (isset($_POST['action']) && $_POST['action'] == 'add_category') {
         $stmt = $pdo->prepare("INSERT IGNORE INTO categories (name) VALUES (?)");
@@ -103,8 +98,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// --- XỬ LÝ GET (XÓA) ---
+// --- XỬ LÝ GET XÓA (QUAN TRỌNG: CHẶN NẾU KHÔNG PHẢI ADMIN) ---
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
+
+    // [BẢO MẬT] Chặn xóa nếu không phải Admin
+    if (!$isAdmin) {
+        die("Bạn không có quyền xóa.");
+    }
+
     $pdo->prepare("DELETE FROM places WHERE id = ?")->execute([$_GET['id']]);
     header("Location: index.php");
     exit;
@@ -165,12 +166,23 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <a class="navbar-brand d-flex align-items-center" href="index.php">
                 <i class="bi bi-journal-richtext text-secondary me-2 fs-3"></i> Địa điểm của Thành Đạt
             </a>
+
+            <div class="d-flex align-items-center gap-2">
+                <?php if ($isLoggedIn): ?>
+                <span class="d-none d-sm-inline">Chào, <b><?= htmlspecialchars($_SESSION['username']) ?></b>
+                    (<?= $isAdmin ? 'Admin' : 'Xem' ?>)</span>
+                <a href="index.php?action=logout" class="btn btn-sm btn-outline-danger fw-bold">Thoát</a>
+                <?php else: ?>
+                <a href="login.php" class="btn btn-sm btn-primary fw-bold">Đăng nhập</a>
+                <?php endif; ?>
+            </div>
         </div>
     </nav>
 
     <div class="container pb-5">
         <div class="row g-4">
             <div class="col-lg-4">
+                <?php if ($isAdmin): ?>
                 <button class="btn btn-primary w-100 mb-3 d-lg-none btn-mobile-toggle fw-bold" type="button"
                     data-bs-toggle="collapse" data-bs-target="#formCollapse">
                     <i class="bi bi-plus-circle-fill me-2"></i> Viết Check-in Mới
@@ -254,6 +266,13 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </div>
                     </div>
                 </div>
+                <?php else: ?>
+                <div class="alert alert-info shadow-sm sticky-top" style="top: 90px;">
+                    <h5 class="fw-bold"><i class="bi bi-info-circle-fill me-2"></i>Thông báo</h5>
+                    <p class="mb-0">Bạn đang ở chế độ <b>Xem</b>. Vui lòng <a href="login.php"
+                            class="fw-bold text-primary">Đăng nhập Admin</a> để thêm hoặc chỉnh sửa địa điểm.</p>
+                </div>
+                <?php endif; ?>
             </div>
 
             <div class="col-lg-8">
@@ -269,7 +288,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </button>
                         <?php endif; ?>
 
-                        <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory)): ?>
+                        <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory) || !empty($search)): ?>
                         <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
                                 class="bi bi-x-lg me-1"></i> Xóa lọc</a>
                         <?php endif; ?>
@@ -337,6 +356,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         ?>
                     <div class="col-md-6 col-xl-6">
                         <div class="card place-card h-100">
+                            <?php if ($isAdmin): ?>
                             <div class="action-buttons">
                                 <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editModal"
                                     onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)"><i
@@ -345,6 +365,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     onclick="return confirm('Bạn chắc chắn muốn xóa?');"><i
                                         class="bi bi-trash-fill"></i></a>
                             </div>
+                            <?php endif; ?>
 
                             <div class="card-map-header">
                                 <?php if ($place['latitude']): ?>
@@ -559,8 +580,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById('add_city').value = 'Hồ Chí Minh';
-        updateDistricts('add_city', 'add_district');
+        document.getElementById('add_city') && (document.getElementById('add_city').value = 'Hồ Chí Minh',
+            updateDistricts('add_city', 'add_district'));
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('filter_city')) {
             updateDistricts('filter_city', 'filter_district', urlParams.get('filter_district'));

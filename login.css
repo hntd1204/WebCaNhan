@@ -1,0 +1,91 @@
+/* login.css */
+
+/* 1. Import Font chữ */
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
+/* 2. Cấu hình biến màu sắc */
+:root {
+    --primary: #FF7F50;       /* Màu cam logo */
+    --primary-hover: #ff6b3b; /* Màu cam khi di chuột */
+    --bg-gradient: linear-gradient(135deg, #fff5f2 0%, #fff 100%); /* Nền nhẹ nhàng */
+}
+
+/* 3. Style cơ bản */
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--bg-gradient);
+}
+
+/* 4. Khung đăng nhập (Card) */
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(255, 127, 80, 0.1), 0 5px 15px rgba(0,0,0,0.05);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* 5. Tiêu đề */
+h3 {
+    font-weight: 800;
+    color: var(--primary) !important;
+    letter-spacing: -0.5px;
+}
+
+/* 6. Ô nhập liệu (Input) */
+.form-control {
+    border-radius: 12px;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    transition: all 0.3s;
+}
+
+.form-control:focus {
+    background-color: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(255, 127, 80, 0.15);
+}
+
+/* 7. Nút bấm */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.3s;
+    box-shadow: 0 4px 12px rgba(255, 127, 80, 0.3);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 127, 80, 0.4);
+}
+
+/* 8. Các thành phần khác */
+a {
+    color: #718096;
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+}
+a:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+label {
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.9rem;
+    margin-bottom: 5px;
+}
