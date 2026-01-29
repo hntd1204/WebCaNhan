@@ -1,20 +1,18 @@
 /* =========================================
-   1. FONTS & GLOBAL VARIABLES
+   1. GLOBAL VARIABLES & FONTS
    ========================================= */
-/* Import Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Bảng màu mới tươi tắn hơn */
-    --primary: #FF7F50;       /* Màu Coral (San hô) chủ đạo */
+    --primary: #FF7F50;
     --primary-hover: #ff6b3b;
-    --secondary: #20c997;     /* Màu Mint (Bạc hà) tạo điểm nhấn */
-    --dark-text: #2d3748;     /* Màu chữ tối, không dùng đen tuyền */
-    --light-text: #718096;    /* Màu chữ phụ */
-    --bg-body: #f0f2f5;       /* Màu nền xám rất nhạt, sang hơn màu trắng */
-    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); /* Bóng đổ mềm mại */
-    --border-radius-lg: 20px; /* Bo góc lớn */
-    --border-radius-sm: 12px; /* Bo góc nhỏ */
+    --secondary: #20c997;
+    --dark-text: #2d3748;
+    --light-text: #718096;
+    --bg-body: #f0f2f5;
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+    --border-radius-lg: 20px;
+    --border-radius-sm: 12px;
 }
 
 body {
@@ -24,40 +22,27 @@ body {
     line-height: 1.6;
 }
 
-h1, h2, h3, h4, h5, h6, .navbar-brand {
-    font-family: 'Be Vietnam Pro', sans-serif;
-}
-
 /* =========================================
-   2. NAVBAR (THANH ĐIỀU HƯỚNG)
+   2. NAVBAR & COMPONENTS
    ========================================= */
 .navbar-custom {
     background-color: #ffffff !important;
     box-shadow: 0 2px 15px rgba(0,0,0,0.04);
     padding: 0.8rem 0;
 }
-
 .navbar-brand {
     color: var(--primary) !important;
     font-weight: 700;
     font-size: 1.4rem;
-    letter-spacing: -0.5px;
-}
-.navbar-brand i {
-    color: var(--secondary);
 }
 
-/* =========================================
-   3. COMPONENTS & UTILITIES
-   ========================================= */
-/* Nút bấm chính */
 .btn-primary {
     background-color: var(--primary);
     border-color: var(--primary);
-    font-weight: 600;
     border-radius: var(--border-radius-sm);
     padding: 0.6rem 1.2rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    transition: all 0.3s;
 }
 .btn-primary:hover {
     background-color: var(--primary-hover);
@@ -66,41 +51,24 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     box-shadow: 0 4px 12px rgba(255, 127, 80, 0.3);
 }
 
-/* Ô nhập liệu (Form Controls) */
 .form-control, .form-select {
     border-radius: var(--border-radius-sm);
-    border: 1px solid #e2e8f0;
     padding: 0.75rem 1rem;
-    font-size: 0.95rem;
+    border: 1px solid #e2e8f0;
 }
 .form-control:focus, .form-select:focus {
     border-color: var(--secondary);
     box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
 }
-/* Floating labels adjustments */
-.form-floating > .form-control, .form-floating > .form-select { height: calc(3.5rem + 2px); line-height: 1.25; }
-.form-floating > label { padding: 1rem; }
-
-/* Badges (Nhãn) */
-.badge {
-    padding: 0.5em 0.8em;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    border-radius: 30px;
-}
-.badge.bg-info { background-color: #e3f2fd !important; color: #0c5460 !important; } /* Màu xanh nhạt đẹp hơn */
-.badge.bg-light { background-color: #f7fafc !important; color: var(--light-text) !important; border: 1px solid #edf2f7 !important;}
-
 
 /* =========================================
-   4. LEFT COLUMN: FORM CARD
+   3. CARDS & LAYOUT
    ========================================= */
 .card-form {
     border: none;
     border-radius: var(--border-radius-lg);
     box-shadow: var(--card-shadow);
     background: white;
-    overflow: hidden;
 }
 .card-form .card-header {
     background: transparent;
@@ -109,10 +77,6 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
 }
 .card-form .card-body { padding: 1.5rem; }
 
-/* =========================================
-   5. RIGHT COLUMN: FILTER & PLACE CARDS
-   ========================================= */
-/* Thanh lọc (Filter Bar) */
 .filter-bar {
     background: white;
     border-radius: var(--border-radius-lg);
@@ -121,28 +85,19 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     margin-bottom: 1.5rem;
 }
 
-/* PLACE CARD (Thẻ địa điểm) - Thiết kế mới */
 .place-card {
     border: none;
     border-radius: var(--border-radius-lg);
     background: white;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--card-shadow);
+    transition: transform 0.3s;
     height: 100%;
-    position: relative;
-    overflow: hidden; /* Quan trọng để bo tròn ảnh map header */
-    display: flex;
-    flex-direction: column;
+    overflow: hidden;
 }
+.place-card:hover { transform: translateY(-5px); }
 
-.place-card:hover {
-    transform: translateY(-7px);
-    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
-}
-
-/* Bản đồ làm header của thẻ */
 .card-map-header {
-    height: 160px; /* Chiều cao cố định cho map header */
+    height: 160px;
     background: #e9ecef;
     position: relative;
     width: 100%;
@@ -151,7 +106,7 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     width: 100%;
     height: 100%;
     border: 0;
-    filter: saturate(1.2); /* Làm màu bản đồ tươi hơn chút */
+    filter: saturate(1.2);
 }
 .no-map-placeholder {
     height: 100%;
@@ -159,68 +114,94 @@ h1, h2, h3, h4, h5, h6, .navbar-brand {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #f8f9fa;
     color: #a0aec0;
-    font-size: 0.9rem;
 }
-
-.place-card-body {
-    padding: 1.25rem;
-    flex-grow: 1;
-    display: flex;
-    flex-column: column;
-}
-
+.place-card-body { padding: 1.25rem; }
 .place-title { font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--dark-text); }
-.place-address { font-size: 0.9rem; color: var(--light-text); display: flex; align-items: flex-start; gap: 5px; }
-.place-note { background-color: #fff4e6; /* Màu cam rất nhạt */ color: #9c4221; padding: 0.75rem; border-radius: var(--border-radius-sm); font-size: 0.9rem; font-style: italic; margin: 1rem 0; border-left: 3px solid var(--primary); }
+.place-address { font-size: 0.9rem; color: var(--light-text); display: flex; gap: 5px; }
+.place-note { background-color: #fff4e6; color: #9c4221; padding: 0.75rem; border-radius: var(--border-radius-sm); font-size: 0.9rem; margin-top: 1rem; }
 
-
-/* =========================================
-   6. ACTION BUTTONS (Sửa/Xóa) & MODALS
-   ========================================= */
+/* Action Buttons */
 .action-buttons {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 5px;
-    z-index: 20;
+    top: 10px; right: 10px;
+    z-index: 20; display: flex; gap: 5px;
 }
-
 .btn-action {
-    width: 36px;
-    height: 36px;
-    border-radius: 12px; /* Bo góc mềm hơn tròn */
-    border: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    font-size: 0.9rem;
-    backdrop-filter: blur(5px); /* Hiệu ứng kính mờ nhẹ */
+    width: 32px; height: 32px;
+    border-radius: 8px; border: none;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(5px);
+    transition: 0.2s;
 }
-
-.btn-edit { background: rgba(255, 255, 255, 0.9); color: #3182ce; }
+.btn-edit { background: rgba(255,255,255,0.9); color: #3182ce; }
 .btn-edit:hover { background: #3182ce; color: white; }
-.btn-delete { background: rgba(255, 255, 255, 0.9); color: #e53e3e; }
+.btn-delete { background: rgba(255,255,255,0.9); color: #e53e3e; }
 .btn-delete:hover { background: #e53e3e; color: white; }
 
-/* Modals */
-.modal-content { border-radius: var(--border-radius-lg); border: none; box-shadow: var(--card-shadow); }
-.modal-header { border-bottom: 1px solid #f0f0f0; padding: 1.25rem; }
-.modal-footer { border-top: 1px solid #f0f0f0; padding: 1rem 1.25rem; }
-.cat-row { transition: 0.2s; border-radius: 8px; }
-.cat-row:hover { background-color: #f7fafc; }
-
 /* =========================================
-   7. RESPONSIVE MOBILE
+   4. LUCKY WHEEL STYLES (MỚI)
    ========================================= */
-@media (max-width: 991.98px) {
-    .card-map-header { height: 180px; /* Map cao hơn chút trên mobile */ }
-    .place-card { margin-bottom: 1rem; }
-    .sticky-lg-top { position: static !important; }
-    .btn-mobile-toggle { border-radius: var(--border-radius-sm); padding: 1rem; font-size: 1.1rem; box-shadow: var(--card-shadow) !important;}
+.wheel-wrapper {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    border: 8px solid #ffffff;
+    background: #fff;
+    overflow: hidden;
+}
+
+#wheelCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-radius: 50%;
+}
+
+/* Kim chỉ (Pointer) đẹp hơn */
+.wheel-pointer {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 50px;
+    z-index: 10;
+    filter: drop-shadow(0 4px 4px rgba(0,0,0,0.3));
+}
+.wheel-pointer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: #ff4757;
+    clip-path: polygon(50% 100%, 0 0, 100% 0);
+}
+.wheel-pointer::after {
+    content: '';
+    position: absolute;
+    top: -5px; left: 50%;
+    transform: translateX(-50%);
+    width: 16px; height: 16px;
+    background: #2f3542;
+    border-radius: 50%;
+}
+
+/* Nút quay trung tâm */
+.wheel-center-dot {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 40px; height: 40px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
 }

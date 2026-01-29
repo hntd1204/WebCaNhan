@@ -71,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lat = null;
         $lng = null;
         $originalLink = $_POST['map_url'];
-
         if (!empty($originalLink)) {
             $coords = getCoordinatesFromUrl($originalLink);
             if ($coords) {
@@ -79,8 +78,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lng = $coords['lng'];
             }
         }
-
-        // Thêm city vào câu lệnh INSERT
         $sql = "INSERT INTO places (name, category_id, city, district, address, description, latitude, longitude, rating, original_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['city'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink]);
         header("Location: index.php");
@@ -91,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $lat = $_POST['current_lat'];
         $lng = $_POST['current_lng'];
         $originalLink = $_POST['map_url'];
-
         if (!empty($originalLink)) {
             $coords = getCoordinatesFromUrl($originalLink);
             if ($coords) {
@@ -99,8 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lng = $coords['lng'];
             }
         }
-
-        // Thêm city vào câu lệnh UPDATE
         $sql = "UPDATE places SET name=?, category_id=?, city=?, district=?, address=?, description=?, latitude=?, longitude=?, rating=?, original_link=? WHERE id=?";
         $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['city'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink, $_POST['id']]);
         header("Location: index.php");
@@ -168,7 +162,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="container pb-5">
         <div class="row g-4">
-
             <div class="col-lg-4">
                 <button class="btn btn-primary w-100 mb-3 d-lg-none btn-mobile-toggle fw-bold" type="button"
                     data-bs-toggle="collapse" data-bs-target="#formCollapse">
@@ -185,13 +178,11 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="card-body">
                             <form method="POST">
                                 <input type="hidden" name="action" value="add_place">
-
                                 <div class="form-floating mb-3">
                                     <input type="text" name="name" class="form-control" id="floatingName" required
                                         placeholder="Tên quán">
                                     <label for="floatingName">Tên địa điểm / Quán ăn</label>
                                 </div>
-
                                 <div class="form-floating mb-3">
                                     <select name="category_id" class="form-select" id="floatingCat">
                                         <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
@@ -203,15 +194,13 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             data-bs-target="#catModal"><i class="bi bi-gear"></i></button>
                                     </div>
                                 </div>
-
                                 <div class="row g-2 mb-3">
                                     <div class="col-12 col-md-6">
                                         <div class="form-floating">
                                             <select name="city" class="form-select" id="add_city"
                                                 onchange="updateDistricts('add_city', 'add_district')">
-                                                <?php foreach (array_keys($locations) as $city): ?>
-                                                <option value="<?= $city ?>"><?= $city ?></option>
-                                                <?php endforeach; ?>
+                                                <?php foreach (array_keys($locations) as $city): ?><option
+                                                    value="<?= $city ?>"><?= $city ?></option><?php endforeach; ?>
                                             </select>
                                             <label>Thành phố</label>
                                         </div>
@@ -225,20 +214,17 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="form-floating mb-3">
                                     <input type="url" name="map_url" class="form-control" id="floatingLink" required
                                         placeholder="Link Map">
                                     <label for="floatingLink"><i class="bi bi-link-45deg text-danger me-1"></i> Dán link
                                         Google Map</label>
                                 </div>
-
                                 <div class="form-floating mb-3">
                                     <input type="text" name="address" class="form-control" id="floatingAddress"
                                         placeholder="Địa chỉ">
-                                    <label for="floatingAddress">Địa chỉ chi tiết (Số nhà, đường)</label>
+                                    <label for="floatingAddress">Địa chỉ chi tiết</label>
                                 </div>
-
                                 <div class="form-floating mb-3">
                                     <select name="rating" class="form-select" id="floatingRating">
                                         <option value="5">⭐⭐⭐⭐⭐ (5 - Tuyệt vời)</option>
@@ -249,16 +235,13 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     </select>
                                     <label for="floatingRating">Đánh giá</label>
                                 </div>
-
                                 <div class="form-floating mb-4">
                                     <textarea name="description" class="form-control" id="floatingDesc"
                                         style="height: 100px" placeholder="Ghi chú"></textarea>
                                     <label for="floatingDesc">Ghi chú (Món ngon, giá cả...)</label>
                                 </div>
-
-                                <button type="submit" class="btn btn-primary w-100 py-3 fs-5 shadow-sm">
-                                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> Lưu Lại Ngay
-                                </button>
+                                <button type="submit" class="btn btn-primary w-100 py-3 fs-5 shadow-sm"><i
+                                        class="bi bi-cloud-arrow-up-fill me-2"></i> Lưu Lại Ngay</button>
                             </form>
                         </div>
                     </div>
@@ -267,22 +250,29 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="col-lg-8">
                 <div
-                    class="filter-bar d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
-                    <div class="d-flex align-items-center">
-                        <h5 class="mb-0 fw-bold text-dark me-3">Danh sách (<?= count($places) ?>)</h5>
+                    class="filter-bar d-flex flex-column flex-xl-row align-items-xl-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <h5 class="mb-0 fw-bold text-dark text-nowrap">Danh sách (<?= count($places) ?>)</h5>
+
+                        <?php if (!empty($places)): ?>
+                        <button class="btn btn-warning btn-sm fw-bold shadow-sm rounded-pill px-3 py-2 text-dark"
+                            data-bs-toggle="modal" data-bs-target="#wheelModal">
+                            <i class="bi bi-compass-fill me-1"></i> Random
+                        </button>
+                        <?php endif; ?>
+
                         <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory)): ?>
                         <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
                                 class="bi bi-x-lg me-1"></i> Xóa lọc</a>
                         <?php endif; ?>
                     </div>
 
-                    <form method="GET"
-                        class="d-flex flex-column flex-md-row gap-2 flex-grow-1 flex-md-grow-0 align-items-md-center justify-content-end">
+                    <form method="GET" class="d-flex flex-column flex-sm-row gap-2 flex-grow-1 justify-content-end">
                         <div class="input-group input-group-sm flex-nowrap">
                             <span class="input-group-text bg-white border-end-0 text-secondary"><i
                                     class="bi bi-building"></i></span>
                             <select name="filter_city" id="filter_city"
-                                class="form-select form-select-sm border-start-0 ps-0" style="min-width: 110px;"
+                                class="form-select form-select-sm border-start-0 ps-0" style="min-width: 100px;"
                                 onchange="updateDistricts('filter_city', 'filter_district'); this.form.submit()">
                                 <option value="">Tất cả TP</option>
                                 <?php foreach (array_keys($locations) as $city): ?>
@@ -296,7 +286,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <span class="input-group-text bg-white border-end-0 text-secondary"><i
                                     class="bi bi-geo-alt-fill"></i></span>
                             <select name="filter_district" id="filter_district"
-                                class="form-select form-select-sm border-start-0 ps-0" style="min-width: 110px;"
+                                class="form-select form-select-sm border-start-0 ps-0" style="min-width: 100px;"
                                 onchange="this.form.submit()">
                                 <option value="">Tất cả Quận</option>
                             </select>
@@ -306,11 +296,13 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <span class="input-group-text bg-white border-end-0 text-secondary"><i
                                     class="bi bi-tags-fill"></i></span>
                             <select name="filter_category" class="form-select form-select-sm border-start-0 ps-0"
-                                onchange="this.form.submit()" style="min-width: 110px;">
+                                onchange="this.form.submit()" style="min-width: 100px;">
                                 <option value="">Tất cả Danh mục</option>
-                                <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>"
+                                <?php foreach ($cats as $cat): ?>
+                                <option value="<?= $cat['id'] ?>"
                                     <?= ($filterCategory == $cat['id']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
+                                    <?= htmlspecialchars($cat['name']) ?></option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </form>
@@ -340,9 +332,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <iframe class="map-iframe" style="pointer-events: none;" loading="lazy"
                                     src="https://maps.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>&hl=vi&z=16&output=embed"></iframe>
                                 <?php else: ?>
-                                <div class="no-map-placeholder">
-                                    <i class="bi bi-map-fill fs-1 mb-2 opacity-50"></i>
-                                    <span>Chưa có bản đồ</span>
+                                <div class="no-map-placeholder"><i
+                                        class="bi bi-map-fill fs-1 mb-2 opacity-50"></i><span>Chưa có bản đồ</span>
                                 </div>
                                 <?php endif; ?>
                                 <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
@@ -354,32 +345,23 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <div>
                                         <span
                                             class="badge bg-info mb-2"><?= htmlspecialchars($place['category_name'] ?? 'Khác') ?></span>
-                                        <span class="badge bg-light text-dark border ms-1">
-                                            <?= htmlspecialchars(($place['city'] == 'Hồ Chí Minh' ? 'HCM' : $place['city']) . ' - ' . $place['district']) ?>
-                                        </span>
+                                        <span
+                                            class="badge bg-light text-dark border ms-1"><?= htmlspecialchars(($place['city'] == 'Hồ Chí Minh' ? 'HCM' : $place['city']) . ' - ' . $place['district']) ?></span>
                                     </div>
                                     <div class="text-warning small">
-                                        <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?>
-                                    </div>
+                                        <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?></div>
                                 </div>
-
                                 <h5 class="place-title fw-bold text-truncate"><?= htmlspecialchars($place['name']) ?>
                                 </h5>
-
-                                <p class="place-address mb-2 text-truncate">
-                                    <i class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i>
-                                    <span
+                                <p class="place-address mb-2 text-truncate"><i
+                                        class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i> <span
                                         class="text-truncate"><?= htmlspecialchars($place['address'] ?: 'Chưa cập nhật địa chỉ') ?></span>
                                 </p>
-
                                 <?php if (!empty($place['description'])): ?>
-                                <div class="place-note mt-auto">
-                                    <i class="bi bi-quote me-1 opacity-50"></i>
-                                    <?= htmlspecialchars($place['description']) ?>
+                                <div class="place-note mt-auto"><i
+                                        class="bi bi-quote me-1 opacity-50"></i><?= htmlspecialchars($place['description']) ?>
                                 </div>
-                                <?php else: ?>
-                                <div class="mt-auto"></div>
-                                <?php endif; ?>
+                                <?php else: ?><div class="mt-auto"></div><?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -387,10 +369,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                     <?php if (empty($places)): ?>
                     <div class="col-12">
-                        <div class="alert alert-light text-center p-5 shadow-sm rounded-4">
-                            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
-                            Chưa có địa điểm nào phù hợp.
-                        </div>
+                        <div class="alert alert-light text-center p-5 shadow-sm rounded-4"><i
+                                class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>Chưa có địa điểm nào phù hợp.</div>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -409,11 +389,11 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <h6 class="text-primary fw-bold mb-3">Thêm mới</h6>
                     <form method="POST" class="d-flex gap-2 mb-4 pb-4 border-bottom"><input type="hidden" name="action"
                             value="add_category"><input type="text" name="category_name" class="form-control" required
-                            placeholder="VD: Trà sữa, Ăn vặt..."><button type="submit"
+                            placeholder="VD: Trà sữa..."><button type="submit"
                             class="btn btn-primary text-nowrap px-4">Thêm</button></form>
                     <h6 class="text-dark fw-bold mb-3">Danh sách hiện tại</h6>
-                    <div style="max-height: 300px; overflow-y: auto;" class="pe-2"><?php foreach ($cats as $cat): ?><div
-                            class="d-flex gap-2 align-items-center mb-2 cat-row p-2 border rounded-3 bg-light">
+                    <div style="max-height: 300px; overflow-y: auto;" class="pe-2"><?php foreach ($cats as $cat): ?>
+                        <div class="d-flex gap-2 align-items-center mb-2 cat-row p-2 border rounded-3 bg-light">
                             <form method="POST" class="d-flex gap-2 flex-grow-1"><input type="hidden" name="action"
                                     value="update_category"><input type="hidden" name="cat_id"
                                     value="<?= $cat['id'] ?>"><input type="text" name="cat_name"
@@ -425,7 +405,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     value="<?= $cat['id'] ?>"><button type="submit"
                                     class="btn btn-sm btn-outline-danger px-3"><i class="bi bi-trash"></i></button>
                             </form>
-                        </div><?php endforeach; ?></div>
+                        </div><?php endforeach; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -445,8 +426,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating"><input type="text" name="name" id="edit_name"
-                                        class="form-control" required placeholder="Tên"><label>Tên địa điểm</label>
-                                </div>
+                                        class="form-control" required><label>Tên địa điểm</label></div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating"><select name="category_id" id="edit_cat"
@@ -467,7 +447,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <option value="">-- Chọn --</option>
                                     </select><label>Quận / Huyện</label></div>
                             </div>
-
                             <div class="col-md-6">
                                 <div class="form-floating"><select name="rating" id="edit_rating" class="form-select">
                                         <option value="5">5 - Tuyệt vời</option>
@@ -479,17 +458,17 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="col-12">
                                 <div class="form-floating"><input type="url" name="map_url" id="edit_map_url"
-                                        class="form-control" placeholder="Link"><label class="text-danger">Link Google
-                                        Maps (Dán đè lên nếu muốn đổi)</label></div>
+                                        class="form-control"><label class="text-danger">Link Google Maps (Dán đè lên nếu
+                                        muốn đổi)</label></div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating"><input type="text" name="address" id="edit_address"
-                                        class="form-control" placeholder="Địa chỉ"><label>Địa chỉ hiển thị</label></div>
+                                        class="form-control"><label>Địa chỉ hiển thị</label></div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating"><textarea name="description" id="edit_desc"
-                                        class="form-control" style="height: 100px"
-                                        placeholder="Ghi chú"></textarea><label>Ghi chú</label></div>
+                                        class="form-control" style="height: 100px"></textarea><label>Ghi chú</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -501,35 +480,51 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="modal fade" id="wheelModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-star-fill me-2"></i>Hôm nay ăn gì?</h5><button
+                        type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center overflow-hidden">
+                    <div id="wheel-container" style="position: relative; width: 300px; height: 300px; margin: 0 auto;">
+                        <canvas id="wheelCanvas" width="300" height="300"></canvas>
+                        <div id="wheel-pointer"
+                            style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ff4757; z-index: 10;">
+                        </div>
+                    </div>
+                    <h4 id="result-name" class="mt-4 fw-bold text-primary"></h4>
+                    <p id="result-address" class="text-muted small"></p>
+                </div>
+                <div class="modal-footer"><button type="button" id="spinBtn"
+                        class="btn btn-primary w-100 py-2 fs-5 fw-bold">QUAY NGAY</button></div>
+            </div>
+        </div>
+    </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     // 1. Dữ liệu từ PHP -> JS
     const locationsData = <?php echo json_encode($locations); ?>;
+    const currentPlaces = <?php echo json_encode($places); ?>;
 
-    // 2. Hàm cập nhật Quận dựa theo Thành phố
     function updateDistricts(citySelectId, districtSelectId, selectedDistrict = null) {
         const citySel = document.getElementById(citySelectId);
         const distSel = document.getElementById(districtSelectId);
         const city = citySel.value;
-
-        // Xóa cũ
         distSel.innerHTML = '<option value="">-- Tất cả/Chọn --</option>';
-
         if (city && locationsData[city]) {
             locationsData[city].forEach(function(d) {
                 const option = document.createElement("option");
                 option.value = d;
                 option.text = d;
-                if (selectedDistrict && d === selectedDistrict) {
-                    option.selected = true;
-                }
+                if (selectedDistrict && d === selectedDistrict) option.selected = true;
                 distSel.appendChild(option);
             });
         }
     }
 
-    // 3. Hàm điền dữ liệu vào Modal Sửa
     function fillEditModal(data) {
         document.getElementById('edit_id').value = data.id;
         document.getElementById('edit_name').value = data.name;
@@ -540,28 +535,103 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('edit_lat').value = data.latitude;
         document.getElementById('edit_lng').value = data.longitude;
         document.getElementById('edit_map_url').value = data.original_link || '';
-
-        // Xử lý City & District
-        const cityVal = data.city || 'Hồ Chí Minh'; // Mặc định HCM nếu null
-        document.getElementById('edit_city').value = cityVal;
-
-        // Trigger cập nhật district list rồi mới chọn district
+        document.getElementById('edit_city').value = data.city || 'Hồ Chí Minh';
         updateDistricts('edit_city', 'edit_district', data.district);
     }
 
-    // 4. Khởi chạy mặc định khi load trang
     document.addEventListener("DOMContentLoaded", function() {
-        // Form thêm mới: Mặc định chọn HCM
         document.getElementById('add_city').value = 'Hồ Chí Minh';
         updateDistricts('add_city', 'add_district');
-
-        // Bộ lọc: Nếu URL có sẵn city, hãy fill district tương ứng
         const urlParams = new URLSearchParams(window.location.search);
-        const filterCity = urlParams.get('filter_city');
-        const filterDistrict = urlParams.get('filter_district');
-        if (filterCity) {
-            updateDistricts('filter_city', 'filter_district', filterDistrict);
+        if (urlParams.get('filter_city')) {
+            updateDistricts('filter_city', 'filter_district', urlParams.get('filter_district'));
         }
+    });
+
+    // --- LOGIC VÒNG QUAY ---
+    const canvas = document.getElementById('wheelCanvas');
+    const ctx = canvas.getContext('2d');
+    const spinBtn = document.getElementById('spinBtn');
+    const resultName = document.getElementById('result-name');
+    const resultAddress = document.getElementById('result-address');
+
+    let startAngle = 0;
+    let spinTimeout = null;
+    let spinAngleStart = 10;
+    let spinTime = 0;
+    let spinTimeTotal = 0;
+
+    function drawWheel() {
+        if (!currentPlaces.length) return;
+        const centerX = 150,
+            centerY = 150,
+            radius = 140;
+        const arc = Math.PI / (currentPlaces.length / 2);
+
+        ctx.clearRect(0, 0, 300, 300);
+        currentPlaces.forEach((place, i) => {
+            const angle = startAngle + i * arc;
+            ctx.fillStyle = i % 2 === 0 ? '#FF7F50' : '#20c997';
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, angle, angle + arc, false);
+            ctx.lineTo(centerX, centerY);
+            ctx.fill();
+
+            ctx.save();
+            ctx.fillStyle = "white";
+            ctx.translate(centerX + Math.cos(angle + arc / 2) * radius * 0.6, centerY + Math.sin(angle + arc /
+                2) * radius * 0.6);
+            ctx.rotate(angle + arc / 2 + Math.PI / 2);
+            const text = place.name.substring(0, 15);
+            ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+            ctx.restore();
+        });
+    }
+
+    function rotateWheel() {
+        spinTime += 30;
+        if (spinTime >= spinTimeTotal) {
+            stopRotateWheel();
+            return;
+        }
+        const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+        startAngle += (spinAngle * Math.PI / 180);
+        drawWheel();
+        spinTimeout = setTimeout(rotateWheel, 30);
+    }
+
+    function stopRotateWheel() {
+        clearTimeout(spinTimeout);
+        const arc = Math.PI / (currentPlaces.length / 2);
+        const degrees = startAngle * 180 / Math.PI + 90;
+        const arcd = arc * 180 / Math.PI;
+        const index = Math.floor((360 - degrees % 360) / arcd) % currentPlaces.length;
+
+        const winner = currentPlaces[index];
+        resultName.innerText = "⭐ " + winner.name;
+        resultAddress.innerText = winner.address;
+        spinBtn.disabled = false;
+        spinBtn.innerText = "QUAY LẠI";
+    }
+
+    function easeOut(t, b, c, d) {
+        const ts = (t /= d) * t;
+        const tc = ts * t;
+        return b + c * (tc + -3 * ts + 3 * t);
+    }
+
+    spinBtn.addEventListener('click', () => {
+        resultName.innerText = "Đang quay...";
+        resultAddress.innerText = "";
+        spinBtn.disabled = true;
+        spinAngleStart = Math.random() * 10 + 10;
+        spinTime = 0;
+        spinTimeTotal = Math.random() * 3 + 4 * 1000;
+        rotateWheel();
+    });
+
+    document.getElementById('wheelModal').addEventListener('shown.bs.modal', function() {
+        drawWheel();
     });
     </script>
 </body>
