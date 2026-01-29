@@ -38,28 +38,22 @@ function getCoordinatesFromUrl($url)
     return null;
 }
 
-// --- XỬ LÝ POST (THÊM / SỬA / XÓA) ---
+// --- XỬ LÝ POST ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
     // 1. Thêm Danh mục
     if (isset($_POST['action']) && $_POST['action'] == 'add_category') {
-        $newCatName = trim($_POST['category_name']);
-        if (!empty($newCatName)) {
-            $stmt = $pdo->prepare("INSERT IGNORE INTO categories (name) VALUES (?)");
-            $stmt->execute([$newCatName]);
-        }
+        $stmt = $pdo->prepare("INSERT IGNORE INTO categories (name) VALUES (?)");
+        $stmt->execute([trim($_POST['category_name'])]);
         header("Location: index.php");
         exit;
     }
-
-    // 2. Cập nhật tên Danh mục
+    // 2. Sửa Danh mục
     if (isset($_POST['action']) && $_POST['action'] == 'update_category') {
         $stmt = $pdo->prepare("UPDATE categories SET name = ? WHERE id = ?");
         $stmt->execute([trim($_POST['cat_name']), $_POST['cat_id']]);
         header("Location: index.php");
         exit;
     }
-
     // 3. Xóa Danh mục
     if (isset($_POST['action']) && $_POST['action'] == 'delete_category') {
         $catId = $_POST['cat_id'];
@@ -68,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: index.php");
         exit;
     }
-
     // 4. Thêm Địa điểm
     if (isset($_POST['action']) && $_POST['action'] == 'add_place') {
         $lat = null;
@@ -80,41 +73,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $lng = $coords['lng'];
             }
         }
-
         $sql = "INSERT INTO places (name, category_id, district, address, description, latitude, longitude, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating']]);
+        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating']]);
         header("Location: index.php");
         exit;
     }
-
     // 5. Sửa Địa điểm
     if (isset($_POST['action']) && $_POST['action'] == 'edit_place') {
-        $id = $_POST['id'];
-        $mapUrl = $_POST['map_url'];
         $lat = $_POST['current_lat'];
         $lng = $_POST['current_lng'];
-
-        if (!empty($mapUrl) && strpos($mapUrl, '@') !== false) {
-            $coords = getCoordinatesFromUrl($mapUrl);
+        if (!empty($_POST['map_url']) && strpos($_POST['map_url'], '@') !== false) {
+            $coords = getCoordinatesFromUrl($_POST['map_url']);
             if ($coords) {
                 $lat = $coords['lat'];
                 $lng = $coords['lng'];
             }
         }
-
         $sql = "UPDATE places SET name=?, category_id=?, district=?, address=?, description=?, latitude=?, longitude=?, rating=? WHERE id=?";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $id]);
+        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $_POST['id']]);
         header("Location: index.php");
         exit;
     }
 }
 
-// --- XỬ LÝ GET (XÓA & LỌC) ---
+// --- XỬ LÝ GET (XÓA) ---
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
-    $stmt = $pdo->prepare("DELETE FROM places WHERE id = ?");
-    $stmt->execute([$_GET['id']]);
+    $pdo->prepare("DELETE FROM places WHERE id = ?")->execute([$_GET['id']]);
     header("Location: index.php");
     exit;
 }
@@ -122,32 +106,22 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
 // --- LẤY DỮ LIỆU ---
 $cats = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// ============================================
-// LOGIC LỌC DỮ LIỆU (QUẬN + DANH MỤC)
-// ============================================
-$sqlPlace = "SELECT places.*, categories.name as category_name 
-             FROM places 
-             LEFT JOIN categories ON places.category_id = categories.id
-             WHERE 1=1"; // Kỹ thuật 1=1 để dễ nối chuỗi AND
-
+// Query Lọc
+$sqlPlace = "SELECT places.*, categories.name as category_name FROM places LEFT JOIN categories ON places.category_id = categories.id WHERE 1=1";
 $params = [];
 $filterDistrict = $_GET['filter_district'] ?? '';
 $filterCategory = $_GET['filter_category'] ?? '';
 
-// 1. Lọc theo Quận
 if (!empty($filterDistrict)) {
     $sqlPlace .= " AND places.district = ?";
     $params[] = $filterDistrict;
 }
-
-// 2. Lọc theo Danh mục
 if (!empty($filterCategory)) {
     $sqlPlace .= " AND places.category_id = ?";
     $params[] = $filterCategory;
 }
 
 $sqlPlace .= " ORDER BY places.created_at DESC";
-
 $stmt = $pdo->prepare($sqlPlace);
 $stmt->execute($params);
 $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -158,225 +132,223 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bản Đồ Của Thành Đạt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Thành Đạt</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
-    <style>
-    .cat-row {
-        transition: 0.2s;
-    }
-
-    .cat-row:hover {
-        background-color: #f8f9fa;
-    }
-    </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-dark navbar-custom mb-4 sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-light navbar-custom sticky-top mb-4">
         <div class="container">
-            <span class="navbar-brand h1 mb-0"><i class="bi bi-geo-fill"></i> Địa điểm của Thành Đạt</span>
+            <a class="navbar-brand d-flex align-items-center" href="index.php">
+                <i class="bi bi-journal-richtext text-secondary me-2 fs-3"></i> Địa điểm của Thành Đạt
+            </a>
         </div>
     </nav>
 
     <div class="container pb-5">
-        <div class="row">
+        <div class="row g-4">
 
-            <div class="col-lg-4 mb-4">
-                <div class="card card-form sticky-lg-top" style="top: 80px; z-index: 10;">
-                    <div class="card-header">
-                        <span><i class="bi bi-plus-circle-fill"></i> Check-in Mới</span>
-                    </div>
-                    <div class="card-body p-3">
-                        <form method="POST">
-                            <input type="hidden" name="action" value="add_place">
+            <div class="col-lg-4">
+                <button class="btn btn-primary w-100 mb-3 d-lg-none btn-mobile-toggle fw-bold" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#formCollapse">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Viết Check-in Mới
+                </button>
 
-                            <div class="mb-2">
-                                <label class="form-label small fw-bold text-muted">Tên địa điểm</label>
-                                <input type="text" name="name" class="form-control" required
-                                    placeholder="VD: Phở Thìn...">
-                            </div>
+                <div class="collapse d-lg-block" id="formCollapse">
+                    <div class="card card-form sticky-lg-top" style="top: 90px; z-index: 10;">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-pen text-primary me-2"></i>Check-in</h5>
+                            <button type="button" class="btn-close d-lg-none" data-bs-toggle="collapse"
+                                data-bs-target="#formCollapse"></button>
+                        </div>
+                        <div class="card-body">
+                            <form method="POST">
+                                <input type="hidden" name="action" value="add_place">
 
-                            <div class="row mb-2">
-                                <div class="col-7">
-                                    <label class="form-label small fw-bold text-muted">Danh mục</label>
-                                    <div class="input-group">
-                                        <select name="category_id" class="form-select">
-                                            <?php foreach ($cats as $cat): ?>
-                                            <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?>
-                                            </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <button class="btn btn-outline-secondary" type="button" data-bs-toggle="modal"
-                                            data-bs-target="#catModal" title="Quản lý danh mục">
-                                            <i class="bi bi-gear-fill"></i>
-                                        </button>
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="name" class="form-control" id="floatingName" required
+                                        placeholder="Tên quán">
+                                    <label for="floatingName">Tên địa điểm / Quán ăn</label>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+                                    <div class="col-12 col-md-6">
+                                        <div class="input-group h-100">
+                                            <div class="form-floating flex-grow-1">
+                                                <select name="category_id" class="form-select" id="floatingCat">
+                                                    <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
+                                                        <?= htmlspecialchars($cat['name']) ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <label for="floatingCat">Danh mục</label>
+                                            </div>
+                                            <button class="btn btn-light border" type="button" data-bs-toggle="modal"
+                                                data-bs-target="#catModal" style="border-left:0;"><i
+                                                    class="bi bi-gear text-secondary"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6">
+                                        <div class="form-floating">
+                                            <select name="district" class="form-select" id="floatingDist">
+                                                <option value="">-- Chọn --</option>
+                                                <?php foreach ($districts as $d): ?><option value="<?= $d ?>"><?= $d ?>
+                                                </option><?php endforeach; ?>
+                                            </select>
+                                            <label for="floatingDist">Quận / Huyện</label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-5">
-                                    <label class="form-label small fw-bold text-muted">Quận / Huyện</label>
-                                    <select name="district" class="form-select">
-                                        <option value="">-- Chọn --</option>
-                                        <?php foreach ($districts as $d): ?>
-                                        <option value="<?= $d ?>"><?= $d ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+
+                                <div class="form-floating mb-3">
+                                    <input type="url" name="map_url" class="form-control" id="floatingLink" required
+                                        placeholder="Link Map">
+                                    <label for="floatingLink"><i class="bi bi-google text-danger me-1"></i> Link Google
+                                        Maps (có chứa @)</label>
                                 </div>
-                            </div>
 
-                            <div class="mb-2">
-                                <label class="form-label small fw-bold text-muted">Link Google Maps</label>
-                                <input type="url" name="map_url" class="form-control" required
-                                    placeholder="Dán link có chứa @...">
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="address" class="form-control" id="floatingAddress"
+                                        placeholder="Địa chỉ">
+                                    <label for="floatingAddress">Địa chỉ hiển thị (Số nhà, đường)</label>
+                                </div>
 
-                            <div class="mb-2">
-                                <label class="form-label small fw-bold text-muted">Địa chỉ hiển thị</label>
-                                <input type="text" name="address" class="form-control" placeholder="Số nhà, đường...">
-                            </div>
+                                <div class="form-floating mb-3">
+                                    <select name="rating" class="form-select" id="floatingRating">
+                                        <option value="5">⭐⭐⭐⭐⭐ (5 - Tuyệt vời)</option>
+                                        <option value="4">⭐⭐⭐⭐ (4 - Ngon)</option>
+                                        <option value="3">⭐⭐⭐ (3 - Ổn)</option>
+                                        <option value="2">⭐⭐ (2 - Tệ)</option>
+                                        <option value="1">⭐ (1 - Rất tệ)</option>
+                                    </select>
+                                    <label for="floatingRating">Đánh giá trải nghiệm</label>
+                                </div>
 
-                            <div class="mb-2">
-                                <label class="form-label small fw-bold text-muted">Đánh giá</label>
-                                <select name="rating" class="form-select">
-                                    <option value="5">⭐⭐⭐⭐⭐ (Tuyệt vời)</option>
-                                    <option value="4">⭐⭐⭐⭐ (Ngon)</option>
-                                    <option value="3">⭐⭐⭐ (Ổn)</option>
-                                    <option value="2">⭐⭐ (Tệ)</option>
-                                    <option value="1">⭐ (Rất tệ)</option>
-                                </select>
-                            </div>
+                                <div class="form-floating mb-4">
+                                    <textarea name="description" class="form-control" id="floatingDesc"
+                                        style="height: 100px" placeholder="Ghi chú"></textarea>
+                                    <label for="floatingDesc">Ghi chú (Món ngon, giá cả...)</label>
+                                </div>
 
-                            <div class="mb-3">
-                                <label class="form-label small fw-bold text-muted">Ghi chú</label>
-                                <textarea name="description" class="form-control" rows="2"
-                                    placeholder="Note lại món ngon..."></textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-save text-white w-100 rounded-3">
-                                <i class="bi bi-save2-fill"></i> Lưu Địa Điểm
-                            </button>
-                        </form>
+                                <button type="submit" class="btn btn-primary w-100 py-3 fs-5 shadow-sm">
+                                    <i class="bi bi-cloud-arrow-up-fill me-2"></i> Lưu Lại Ngay
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="col-lg-8">
-
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
-                    <h5 class="text-secondary border-start border-4 border-danger ps-2 mb-0">
-                        Danh sách (<?= count($places) ?>)
-                    </h5>
-
-                    <form method="GET" class="d-flex align-items-center gap-2">
-
-                        <select name="filter_district" class="form-select form-select-sm" style="width: 140px;"
-                            onchange="this.form.submit()">
-                            <option value="">📍 Tất cả Quận</option>
-                            <?php foreach ($districts as $d): ?>
-                            <option value="<?= $d ?>" <?= ($filterDistrict == $d) ? 'selected' : '' ?>>
-                                <?= $d ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <select name="filter_category" class="form-select form-select-sm" style="width: 140px;"
-                            onchange="this.form.submit()">
-                            <option value="">🏷️ Tất cả Danh mục</option>
-                            <?php foreach ($cats as $cat): ?>
-                            <option value="<?= $cat['id'] ?>" <?= ($filterCategory == $cat['id']) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($cat['name']) ?>
-                            </option>
-                            <?php endforeach; ?>
-                        </select>
-
+                <div
+                    class="filter-bar d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center">
+                        <h5 class="mb-0 fw-bold text-dark me-3">Danh sách (<?= count($places) ?>)</h5>
                         <?php if (!empty($filterDistrict) || !empty($filterCategory)): ?>
-                        <a href="index.php" class="btn btn-sm btn-outline-danger" title="Xóa bộ lọc">
-                            <i class="bi bi-x-lg"></i>
-                        </a>
+                        <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
+                                class="bi bi-x-lg me-1"></i> Xóa lọc</a>
                         <?php endif; ?>
+                    </div>
+
+                    <form method="GET"
+                        class="d-flex flex-column flex-md-row gap-2 flex-grow-1 flex-md-grow-0 align-items-md-center justify-content-end">
+                        <div class="input-group input-group-sm flex-nowrap">
+                            <span class="input-group-text bg-white border-end-0 text-secondary"><i
+                                    class="bi bi-geo-alt-fill"></i></span>
+                            <select name="filter_district" class="form-select form-select-sm border-start-0 ps-0"
+                                onchange="this.form.submit()" style="min-width: 130px;">
+                                <option value="">Tất cả Quận</option>
+                                <?php foreach ($districts as $d): ?><option value="<?= $d ?>"
+                                    <?= ($filterDistrict == $d) ? 'selected' : '' ?>><?= $d ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="input-group input-group-sm flex-nowrap">
+                            <span class="input-group-text bg-white border-end-0 text-secondary"><i
+                                    class="bi bi-tags-fill"></i></span>
+                            <select name="filter_category" class="form-select form-select-sm border-start-0 ps-0"
+                                onchange="this.form.submit()" style="min-width: 150px;">
+                                <option value="">Tất cả Danh mục</option>
+                                <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>"
+                                    <?= ($filterCategory == $cat['id']) ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
+                            </select>
+                        </div>
                     </form>
                 </div>
 
                 <div class="row g-4">
                     <?php foreach ($places as $place): ?>
-                    <div class="col-12">
-                        <div class="card place-card p-3">
-
-                            <div class="action-buttons" style="z-index: 10;">
+                    <div class="col-md-6 col-xl-6">
+                        <div class="card place-card h-100">
+                            <div class="action-buttons">
                                 <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editModal"
-                                    onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </button>
+                                    onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)"><i
+                                        class="bi bi-pencil-fill"></i></button>
                                 <a href="index.php?action=delete&id=<?= $place['id'] ?>" class="btn-action btn-delete"
-                                    onclick="return confirm('Bạn có chắc chắn muốn xóa địa điểm này không?');">
-                                    <i class="bi bi-trash-fill"></i>
-                                </a>
+                                    onclick="return confirm('Bạn chắc chắn muốn xóa?');"><i
+                                        class="bi bi-trash-fill"></i></a>
                             </div>
 
-                            <div class="row g-0">
-                                <div class="col-md-7 pe-3 d-flex flex-column">
-                                    <div class="mb-2">
-                                        <span class="badge bg-info text-dark category-badge">
-                                            <?= htmlspecialchars($place['category_name'] ?? 'Chưa phân loại') ?>
-                                        </span>
-                                        <?php if (!empty($place['district'])): ?>
-                                        <span class="badge bg-light text-secondary border ms-1">
-                                            <?= htmlspecialchars($place['district']) ?>
-                                        </span>
-                                        <?php endif; ?>
-                                        <span class="text-warning ms-1 small">
-                                            <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?>
-                                        </span>
+                            <div class="card-map-header">
+                                <?php if ($place['latitude']): ?>
+                                <iframe class="map-iframe" style="pointer-events: none;" loading="lazy"
+                                    src="https://maps.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>&hl=vi&z=16&output=embed"></iframe>
+                                <?php else: ?>
+                                <div class="no-map-placeholder">
+                                    <i class="bi bi-map-fill fs-1 mb-2 opacity-50"></i>
+                                    <span>Chưa có bản đồ</span>
+                                </div>
+                                <?php endif; ?>
+                                <?php if ($place['latitude']): ?>
+                                <a href="https://www.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>"
+                                    target="_blank" class="stretched-link"></a>
+                                <?php endif; ?>
+                            </div>
+
+                            <div class="place-card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <div>
+                                        <span
+                                            class="badge bg-info mb-2"><?= htmlspecialchars($place['category_name'] ?? 'Khác') ?></span>
+                                        <?php if (!empty($place['district'])): ?><span
+                                            class="badge bg-light text-dark border ms-1"><?= htmlspecialchars($place['district']) ?></span><?php endif; ?>
                                     </div>
-
-                                    <h4 class="fw-bold mb-1 text-dark"><?= htmlspecialchars($place['name']) ?></h4>
-                                    <p class="text-muted small mb-2"><i class="bi bi-geo-alt"></i>
-                                        <?= htmlspecialchars($place['address']) ?></p>
-
-                                    <p class="fst-italic bg-light p-2 rounded small text-secondary mb-3">
-                                        "<?= htmlspecialchars($place['description']) ?>"
-                                    </p>
-
-                                    <div class="mt-auto">
-                                        <?php if ($place['latitude']): ?>
-                                        <a href="https://www.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>"
-                                            target="_blank" class="btn-gmap stretched-link">
-                                            <i class="bi bi-google"></i> Xem trên Google Maps
-                                        </a>
-                                        <?php endif; ?>
+                                    <div class="text-warning small">
+                                        <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?><?= str_repeat('<i class="bi bi-star text-black-50"></i>', 5 - $place['rating']) ?>
                                     </div>
                                 </div>
 
-                                <div class="col-md-5 mt-3 mt-md-0">
-                                    <?php if ($place['latitude']): ?>
-                                    <div class="map-container shadow-sm position-relative">
-                                        <iframe class="map-iframe" style="pointer-events: none;" loading="lazy"
-                                            src="https://maps.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>&hl=vi&z=15&output=embed">
-                                        </iframe>
-                                    </div>
-                                    <?php else: ?>
-                                    <div
-                                        class="map-container d-flex align-items-center justify-content-center bg-light text-muted">
-                                        <i class="bi bi-map-fill me-2"></i> No Map
-                                    </div>
-                                    <?php endif; ?>
+                                <h5 class="place-title fw-bold text-truncate"><?= htmlspecialchars($place['name']) ?>
+                                </h5>
+
+                                <p class="place-address mb-2 text-truncate">
+                                    <i class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i>
+                                    <span
+                                        class="text-truncate"><?= htmlspecialchars($place['address'] ?: 'Chưa cập nhật địa chỉ') ?></span>
+                                </p>
+
+                                <?php if (!empty($place['description'])): ?>
+                                <div class="place-note mt-auto">
+                                    <i class="bi bi-quote me-1 opacity-50"></i>
+                                    <?= htmlspecialchars($place['description']) ?>
                                 </div>
+                                <?php else: ?>
+                                <div class="mt-auto"></div> <?php endif; ?>
                             </div>
                         </div>
                     </div>
                     <?php endforeach; ?>
 
                     <?php if (empty($places)): ?>
-                    <div class="alert alert-warning text-center">
-                        <?php if (!empty($filterDistrict) || !empty($filterCategory)): ?>
-                        Không tìm thấy địa điểm nào phù hợp với bộ lọc.
-                        <a href="index.php" class="alert-link">Xóa bộ lọc</a>
-                        <?php else: ?>
-                        Chưa có dữ liệu. Hãy thêm địa điểm đầu tiên!
-                        <?php endif; ?>
+                    <div class="col-12">
+                        <div class="alert alert-light text-center p-5 shadow-sm rounded-4">
+                            <i class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>
+                            Chưa có địa điểm nào phù hợp.
+                        </div>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -388,43 +360,32 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="bi bi-tags"></i> Quản lý Danh mục</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold">Quản lý Danh mục</h5><button type="button" class="btn-close"
+                        data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <h6 class="text-primary fw-bold mb-2">Thêm danh mục mới</h6>
-                    <form method="POST" class="d-flex gap-2 mb-4 pb-3 border-bottom">
-                        <input type="hidden" name="action" value="add_category">
-                        <input type="text" name="category_name" class="form-control" required
-                            placeholder="Nhập tên danh mục...">
-                        <button type="submit" class="btn btn-primary text-nowrap"><i class="bi bi-plus-lg"></i>
-                            Thêm</button>
-                    </form>
-
-                    <h6 class="text-muted fw-bold mb-2">Danh sách hiện tại</h6>
-                    <div style="max-height: 300px; overflow-y: auto;">
-                        <?php foreach ($cats as $cat): ?>
-                        <div class="d-flex gap-2 align-items-center mb-2 cat-row p-1 rounded">
-                            <form method="POST" class="d-flex gap-2 flex-grow-1">
-                                <input type="hidden" name="action" value="update_category">
-                                <input type="hidden" name="cat_id" value="<?= $cat['id'] ?>">
-                                <input type="text" name="cat_name" class="form-control form-control-sm"
-                                    value="<?= htmlspecialchars($cat['name']) ?>">
-                                <button type="submit" class="btn btn-sm btn-outline-success" title="Lưu tên mới"><i
-                                        class="bi bi-check-lg"></i></button>
+                    <h6 class="text-primary fw-bold mb-3">Thêm mới</h6>
+                    <form method="POST" class="d-flex gap-2 mb-4 pb-4 border-bottom"><input type="hidden" name="action"
+                            value="add_category"><input type="text" name="category_name" class="form-control" required
+                            placeholder="VD: Trà sữa, Ăn vặt..."><button type="submit"
+                            class="btn btn-primary text-nowrap px-4">Thêm</button></form>
+                    <h6 class="text-dark fw-bold mb-3">Danh sách hiện tại</h6>
+                    <div style="max-height: 300px; overflow-y: auto;" class="pe-2"><?php foreach ($cats as $cat): ?><div
+                            class="d-flex gap-2 align-items-center mb-2 cat-row p-2 border rounded-3 bg-light">
+                            <form method="POST" class="d-flex gap-2 flex-grow-1"><input type="hidden" name="action"
+                                    value="update_category"><input type="hidden" name="cat_id"
+                                    value="<?= $cat['id'] ?>"><input type="text" name="cat_name"
+                                    class="form-control form-control-sm bg-white"
+                                    value="<?= htmlspecialchars($cat['name']) ?>"><button type="submit"
+                                    class="btn btn-sm btn-success px-3"><i class="bi bi-check-lg"></i></button></form>
+                            <form method="POST"
+                                onsubmit="return confirm('Xoá danh mục này? Các địa điểm liên quan sẽ mất danh mục.');">
+                                <input type="hidden" name="action" value="delete_category"><input type="hidden"
+                                    name="cat_id" value="<?= $cat['id'] ?>"><button type="submit"
+                                    class="btn btn-sm btn-outline-danger px-3"><i class="bi bi-trash"></i></button>
                             </form>
-                            <form method="POST" onsubmit="return confirm('Xoá danh mục này?');">
-                                <input type="hidden" name="action" value="delete_category">
-                                <input type="hidden" name="cat_id" value="<?= $cat['id'] ?>">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i
-                                        class="bi bi-trash"></i></button>
-                            </form>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
+                        </div><?php endforeach; ?></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary"
-                        data-bs-dismiss="modal">Đóng</button></div>
             </div>
         </div>
     </div>
@@ -433,80 +394,66 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Chỉnh sửa thông tin</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold">Chỉnh sửa thông tin</h5><button type="button"
+                        class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form method="POST">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" value="edit_place">
-                        <input type="hidden" name="id" id="edit_id">
-                        <input type="hidden" name="current_lat" id="edit_lat">
-                        <input type="hidden" name="current_lng" id="edit_lng">
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Tên địa điểm</label>
-                                <input type="text" name="name" id="edit_name" class="form-control" required>
+                    <div class="modal-body p-4"><input type="hidden" name="action" value="edit_place"><input
+                            type="hidden" name="id" id="edit_id"><input type="hidden" name="current_lat"
+                            id="edit_lat"><input type="hidden" name="current_lng" id="edit_lng">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating"><input type="text" name="name" id="edit_name"
+                                        class="form-control" required placeholder="Tên"><label>Tên địa điểm</label>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Danh mục</label>
-                                <select name="category_id" id="edit_cat" class="form-select">
-                                    <?php foreach ($cats as $cat): ?>
-                                    <option value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                            <div class="col-md-6">
+                                <div class="form-floating"><select name="category_id" id="edit_cat"
+                                        class="form-select"><?php foreach ($cats as $cat): ?><option
+                                            value="<?= $cat['id'] ?>"><?= htmlspecialchars($cat['name']) ?></option>
+                                        <?php endforeach; ?></select><label>Danh mục</label></div>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Quận / Huyện</label>
-                            <select name="district" id="edit_district" class="form-select">
-                                <option value="">-- Chọn --</option>
-                                <?php foreach ($districts as $d): ?>
-                                <option value="<?= $d ?>"><?= $d ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Link Google Maps</label>
-                            <input type="url" name="map_url" id="edit_map_url" class="form-control"
-                                placeholder="Dán link mới để cập nhật toạ độ...">
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-8 mb-3">
-                                <label class="form-label">Địa chỉ</label>
-                                <input type="text" name="address" id="edit_address" class="form-control">
+                            <div class="col-md-6">
+                                <div class="form-floating"><select name="district" id="edit_district"
+                                        class="form-select">
+                                        <option value="">-- Chọn --</option><?php foreach ($districts as $d): ?><option
+                                            value="<?= $d ?>"><?= $d ?></option><?php endforeach; ?>
+                                    </select><label>Quận / Huyện</label></div>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Đánh giá</label>
-                                <select name="rating" id="edit_rating" class="form-select">
-                                    <option value="5">⭐⭐⭐⭐⭐</option>
-                                    <option value="4">⭐⭐⭐⭐</option>
-                                    <option value="3">⭐⭐⭐</option>
-                                    <option value="2">⭐⭐</option>
-                                    <option value="1">⭐</option>
-                                </select>
+                            <div class="col-md-6">
+                                <div class="form-floating"><select name="rating" id="edit_rating" class="form-select">
+                                        <option value="5">5 - Tuyệt vời</option>
+                                        <option value="4">4 - Ngon</option>
+                                        <option value="3">3 - Ổn</option>
+                                        <option value="2">2 - Tệ</option>
+                                        <option value="1">1 - Rất tệ</option>
+                                    </select><label>Đánh giá</label></div>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Ghi chú</label>
-                            <textarea name="description" id="edit_desc" class="form-control" rows="3"></textarea>
+                            <div class="col-12">
+                                <div class="form-floating"><input type="url" name="map_url" id="edit_map_url"
+                                        class="form-control" placeholder="Link"><label class="text-danger">Link Google
+                                        Maps mới (Nếu muốn đổi vị trí)</label></div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating"><input type="text" name="address" id="edit_address"
+                                        class="form-control" placeholder="Địa chỉ"><label>Địa chỉ hiển thị</label></div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-floating"><textarea name="description" id="edit_desc"
+                                        class="form-control" style="height: 100px"
+                                        placeholder="Ghi chú"></textarea><label>Ghi chú</label></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                        <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    </div>
+                    <div class="modal-footer bg-light"><button type="button" class="btn btn-light border"
+                            data-bs-dismiss="modal">Hủy</button><button type="submit"
+                            class="btn btn-primary px-4 fw-bold">Cập nhật thay đổi</button></div>
                 </form>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
     <script>
     function fillEditModal(data) {
         document.getElementById('edit_id').value = data.id;
@@ -521,7 +468,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('edit_map_url').value = '';
     }
     </script>
-
 </body>
 
 </html>

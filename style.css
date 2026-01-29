@@ -1,240 +1,226 @@
 /* =========================================
-   1. VARIABLES & GLOBAL STYLES
+   1. FONTS & GLOBAL VARIABLES
    ========================================= */
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@600;700&display=swap');
+
 :root {
-    /* Bảng màu chủ đạo */
-    --primary-color: #ff6b6b;   /* Màu cam đỏ (Coral) */
-    --secondary-color: #4ecdc4; /* Màu xanh ngọc (Teal) */
-    --dark-color: #2d3436;      /* Màu chữ tối */
-    --bg-color: #f7f9fc;        /* Màu nền xám xanh nhạt */
-    --google-blue: #4285F4;     /* Màu chuẩn của Google */
-    --danger-color: #c0392b;    /* Màu đỏ đậm cho nút xóa */
+    /* Bảng màu mới tươi tắn hơn */
+    --primary: #FF7F50;       /* Màu Coral (San hô) chủ đạo */
+    --primary-hover: #ff6b3b;
+    --secondary: #20c997;     /* Màu Mint (Bạc hà) tạo điểm nhấn */
+    --dark-text: #2d3748;     /* Màu chữ tối, không dùng đen tuyền */
+    --light-text: #718096;    /* Màu chữ phụ */
+    --bg-body: #f0f2f5;       /* Màu nền xám rất nhạt, sang hơn màu trắng */
+    --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01); /* Bóng đổ mềm mại */
+    --border-radius-lg: 20px; /* Bo góc lớn */
+    --border-radius-sm: 12px; /* Bo góc nhỏ */
 }
 
 body {
-    background-color: var(--bg-color);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: var(--dark-color);
+    background-color: var(--bg-body);
+    font-family: 'Inter', sans-serif; /* Font cho nội dung */
+    color: var(--dark-text);
     line-height: 1.6;
 }
 
+h1, h2, h3, h4, h5, h6, .navbar-brand {
+    font-family: 'Poppins', sans-serif; /* Font cho tiêu đề */
+}
+
 /* =========================================
-   2. NAVBAR (THANH MENU)
+   2. NAVBAR (THANH ĐIỀU HƯỚNG)
    ========================================= */
 .navbar-custom {
-    background: linear-gradient(135deg, var(--primary-color), #ee5253);
-    box-shadow: 0 4px 12px rgba(238, 82, 83, 0.3);
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    background-color: #ffffff !important;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.04);
+    padding: 0.8rem 0;
 }
 
-.navbar-custom .navbar-brand {
+.navbar-brand {
+    color: var(--primary) !important;
     font-weight: 700;
-    letter-spacing: 0.5px;
-    font-size: 1.5rem;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    font-size: 1.4rem;
+    letter-spacing: -0.5px;
+}
+.navbar-brand i {
+    color: var(--secondary);
 }
 
 /* =========================================
-   3. FORM NHẬP LIỆU (BÊN TRÁI)
+   3. COMPONENTS & UTILITIES
+   ========================================= */
+/* Nút bấm chính */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 600;
+    border-radius: var(--border-radius-sm);
+    padding: 0.6rem 1.2rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 127, 80, 0.3);
+}
+
+/* Ô nhập liệu (Form Controls) */
+.form-control, .form-select {
+    border-radius: var(--border-radius-sm);
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+}
+.form-control:focus, .form-select:focus {
+    border-color: var(--secondary);
+    box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.15);
+}
+/* Floating labels adjustments */
+.form-floating > .form-control, .form-floating > .form-select { height: calc(3.5rem + 2px); line-height: 1.25; }
+.form-floating > label { padding: 1rem; }
+
+/* Badges (Nhãn) */
+.badge {
+    padding: 0.5em 0.8em;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    border-radius: 30px;
+}
+.badge.bg-info { background-color: #e3f2fd !important; color: #0c5460 !important; } /* Màu xanh nhạt đẹp hơn */
+.badge.bg-light { background-color: #f7fafc !important; color: var(--light-text) !important; border: 1px solid #edf2f7 !important;}
+
+
+/* =========================================
+   4. LEFT COLUMN: FORM CARD
    ========================================= */
 .card-form {
     border: none;
-    border-radius: 16px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--card-shadow);
     background: white;
-    overflow: hidden; /* Để bo góc header không bị lòi ra */
+    overflow: hidden;
 }
-
 .card-form .card-header {
-    background: white;
-    border-bottom: 2px solid #f1f2f6;
-    padding: 15px 20px;
-    font-weight: 700;
-    color: var(--primary-color);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 1.1rem;
+    background: transparent;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 1.25rem 1.5rem;
 }
-
-/* Tùy chỉnh Input để nhìn mềm mại hơn */
-.form-control, .form-select {
-    background-color: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    background-color: #fff;
-    border-color: var(--secondary-color);
-    box-shadow: 0 0 0 4px rgba(78, 205, 196, 0.2);
-}
-
-/* Nút Lưu chính */
-.btn-save {
-    background-color: var(--primary-color);
-    border: none;
-    padding: 12px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(255, 107, 107, 0.2);
-}
-
-.btn-save:hover {
-    background-color: #ee5253;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(255, 107, 107, 0.3);
-}
+.card-form .card-body { padding: 1.5rem; }
 
 /* =========================================
-   4. PLACE CARD (DANH SÁCH BÊN PHẢI)
+   5. RIGHT COLUMN: FILTER & PLACE CARDS
    ========================================= */
+/* Thanh lọc (Filter Bar) */
+.filter-bar {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 1rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 1.5rem;
+}
+
+/* PLACE CARD (Thẻ địa điểm) - Thiết kế mới */
 .place-card {
     border: none;
-    border-radius: 16px;
+    border-radius: var(--border-radius-lg);
     background: white;
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--card-shadow);
     height: 100%;
-    position: relative; /* Để định vị nút action tuyệt đối */
-    overflow: hidden;
-}
-
-/* Hiệu ứng khi di chuột vào thẻ */
-.place-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-}
-
-/* Badge Danh mục (VD: Quán ăn, Cafe) */
-.category-badge {
-    font-size: 0.7rem;
-    padding: 5px 12px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-/* Khu vực hiển thị bản đồ nhỏ (iframe) */
-.map-container {
-    height: 220px;
-    background: #e9ecef;
-    border-radius: 12px;
-    overflow: hidden;
     position: relative;
-    border: 1px solid rgba(0,0,0,0.05);
+    overflow: hidden; /* Quan trọng để bo tròn ảnh map header */
+    display: flex;
+    flex-direction: column;
 }
 
+.place-card:hover {
+    transform: translateY(-7px);
+    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Bản đồ làm header của thẻ */
+.card-map-header {
+    height: 160px; /* Chiều cao cố định cho map header */
+    background: #e9ecef;
+    position: relative;
+    width: 100%;
+}
 .map-iframe {
     width: 100%;
     height: 100%;
     border: 0;
+    filter: saturate(1.2); /* Làm màu bản đồ tươi hơn chút */
+}
+.no-map-placeholder {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    color: #a0aec0;
+    font-size: 0.9rem;
 }
 
+.place-card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-column: column;
+}
+
+.place-title { font-size: 1.15rem; margin-bottom: 0.5rem; color: var(--dark-text); }
+.place-address { font-size: 0.9rem; color: var(--light-text); display: flex; align-items: flex-start; gap: 5px; }
+.place-note { background-color: #fff4e6; /* Màu cam rất nhạt */ color: #9c4221; padding: 0.75rem; border-radius: var(--border-radius-sm); font-size: 0.9rem; font-style: italic; margin: 1rem 0; border-left: 3px solid var(--primary); }
+
+
 /* =========================================
-   5. ACTION BUTTONS (NÚT SỬA / XÓA)
+   6. ACTION BUTTONS (Sửa/Xóa) & MODALS
    ========================================= */
 .action-buttons {
     position: absolute;
-    top: 15px;
-    right: 15px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 30px;
-    padding: 4px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-    opacity: 0;           /* Mặc định ẩn đi */
-    visibility: hidden;   /* Không chiếm không gian click */
-    transform: translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    z-index: 5;
-}
-
-/* Khi hover vào card thì hiện nút lên */
-.place-card:hover .action-buttons {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    z-index: 20;
 }
 
 .btn-action {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 12px; /* Bo góc mềm hơn tròn */
     border: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin: 0 3px;
-    transition: all 0.2s ease;
+    transition: all 0.2s;
     cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     font-size: 0.9rem;
+    backdrop-filter: blur(5px); /* Hiệu ứng kính mờ nhẹ */
 }
 
-/* Nút Sửa (Màu xanh dương) */
-.btn-edit { 
-    background: #e3f2fd; 
-    color: #1976d2; 
-}
-.btn-edit:hover { 
-    background: #1976d2; 
-    color: white; 
-    transform: rotate(15deg);
-}
+.btn-edit { background: rgba(255, 255, 255, 0.9); color: #3182ce; }
+.btn-edit:hover { background: #3182ce; color: white; }
+.btn-delete { background: rgba(255, 255, 255, 0.9); color: #e53e3e; }
+.btn-delete:hover { background: #e53e3e; color: white; }
 
-/* Nút Xóa (Màu đỏ) */
-.btn-delete { 
-    background: #ffebee; 
-    color: #c62828; 
-}
-.btn-delete:hover { 
-    background: #c62828; 
-    color: white; 
-    transform: rotate(-15deg);
-}
+/* Modals */
+.modal-content { border-radius: var(--border-radius-lg); border: none; box-shadow: var(--card-shadow); }
+.modal-header { border-bottom: 1px solid #f0f0f0; padding: 1.25rem; }
+.modal-footer { border-top: 1px solid #f0f0f0; padding: 1rem 1.25rem; }
+.cat-row { transition: 0.2s; border-radius: 8px; }
+.cat-row:hover { background-color: #f7fafc; }
 
 /* =========================================
-   6. NÚT GOOGLE MAPS (Nổi bật)
+   7. RESPONSIVE MOBILE
    ========================================= */
-.btn-gmap {
-    background: var(--google-blue);
-    color: white !important; /* Force màu chữ trắng */
-    border-radius: 50px;
-    padding: 8px 24px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px; /* Khoảng cách giữa icon và chữ */
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 6px rgba(66, 133, 244, 0.3);
-    margin-top: 10px;
-}
-
-.btn-gmap:hover {
-    background: #3367D6;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(66, 133, 244, 0.4);
-}
-
-/* =========================================
-   7. MODAL (POPUP)
-   ========================================= */
-.modal-content {
-    border-radius: 16px;
-    border: none;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-}
-
-.modal-header {
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-}
-
-.modal-footer {
-    border-top: none;
-    padding: 1.5rem;
+@media (max-width: 991.98px) {
+    .card-map-header { height: 180px; /* Map cao hơn chút trên mobile */ }
+    .place-card { margin-bottom: 1rem; }
+    .sticky-lg-top { position: static !important; }
+    .btn-mobile-toggle { border-radius: var(--border-radius-sm); padding: 1rem; font-size: 1.1rem; box-shadow: var(--card-shadow) !important;}
 }
