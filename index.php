@@ -4,6 +4,7 @@ require 'db.php';
 // --- DANH SÁCH QUẬN (TP.HCM) ---
 $districts = [
     'Quận 1',
+    'Quận 2',
     'Quận 3',
     'Quận 4',
     'Quận 5',
@@ -66,15 +67,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'add_place') {
         $lat = null;
         $lng = null;
-        if (!empty($_POST['map_url'])) {
-            $coords = getCoordinatesFromUrl($_POST['map_url']);
+        $originalLink = $_POST['map_url']; // Link gốc người dùng nhập
+
+        // Cố gắng tách toạ độ để hiện bản đồ preview
+        if (!empty($originalLink)) {
+            $coords = getCoordinatesFromUrl($originalLink);
             if ($coords) {
                 $lat = $coords['lat'];
                 $lng = $coords['lng'];
             }
         }
-        $sql = "INSERT INTO places (name, category_id, district, address, description, latitude, longitude, rating) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating']]);
+
+        $sql = "INSERT INTO places (name, category_id, district, address, description, latitude, longitude, rating, original_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink]);
         header("Location: index.php");
         exit;
     }
@@ -82,15 +87,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] == 'edit_place') {
         $lat = $_POST['current_lat'];
         $lng = $_POST['current_lng'];
-        if (!empty($_POST['map_url']) && strpos($_POST['map_url'], '@') !== false) {
-            $coords = getCoordinatesFromUrl($_POST['map_url']);
+        $originalLink = $_POST['map_url']; // Link mới người dùng nhập (nếu có)
+
+        // Nếu người dùng nhập link mới
+        if (!empty($originalLink)) {
+            $coords = getCoordinatesFromUrl($originalLink);
             if ($coords) {
                 $lat = $coords['lat'];
                 $lng = $coords['lng'];
             }
+        } else {
+            // Nếu không nhập link mới thì giữ link cũ (được gửi qua hidden input hoặc lấy lại từ DB - ở đây ta đơn giản hóa là bắt buộc nhập hoặc lấy lại từ js fill)
+            // Trong logic Modal JS bên dưới, ta sẽ fill link cũ vào ô input, nên $_POST['map_url'] sẽ có giá trị cũ.
         }
-        $sql = "UPDATE places SET name=?, category_id=?, district=?, address=?, description=?, latitude=?, longitude=?, rating=? WHERE id=?";
-        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $_POST['id']]);
+
+        $sql = "UPDATE places SET name=?, category_id=?, district=?, address=?, description=?, latitude=?, longitude=?, rating=?, original_link=? WHERE id=?";
+        $pdo->prepare($sql)->execute([$_POST['name'], $_POST['category_id'], $_POST['district'], $_POST['address'], $_POST['description'], $lat, $lng, $_POST['rating'], $originalLink, $_POST['id']]);
         header("Location: index.php");
         exit;
     }
@@ -206,8 +218,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="form-floating mb-3">
                                     <input type="url" name="map_url" class="form-control" id="floatingLink" required
                                         placeholder="Link Map">
-                                    <label for="floatingLink"><i class="bi bi-google text-danger me-1"></i> Link Google
-                                        Maps (có chứa @)</label>
+                                    <label for="floatingLink"><i class="bi bi-link-45deg text-danger me-1"></i> Dán link
+                                        Google Map vào đây</label>
                                 </div>
 
                                 <div class="form-floating mb-3">
@@ -282,6 +294,14 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="row g-4">
                     <?php foreach ($places as $place): ?>
+                    <?php
+                        // XÁC ĐỊNH LINK ĐỂ CLICK
+                        // Ưu tiên dùng link gốc (original_link). Nếu không có thì mới tự tạo link từ toạ độ.
+                        $clickLink = !empty($place['original_link']) ? $place['original_link'] : "#";
+                        if ($clickLink === "#" && $place['latitude']) {
+                            $clickLink = "http://maps.google.com/?q=" . $place['latitude'] . "," . $place['longitude'];
+                        }
+                        ?>
                     <div class="col-md-6 col-xl-6">
                         <div class="card place-card h-100">
                             <div class="action-buttons">
@@ -303,10 +323,9 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <span>Chưa có bản đồ</span>
                                 </div>
                                 <?php endif; ?>
-                                <?php if ($place['latitude']): ?>
-                                <a href="https://www.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>"
-                                    target="_blank" class="stretched-link"></a>
-                                <?php endif; ?>
+
+                                <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
+                                    class="stretched-link"></a>
                             </div>
 
                             <div class="place-card-body d-flex flex-column">
@@ -337,7 +356,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <?= htmlspecialchars($place['description']) ?>
                                 </div>
                                 <?php else: ?>
-                                <div class="mt-auto"></div> <?php endif; ?>
+                                <div class="mt-auto"></div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -432,7 +452,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <div class="col-12">
                                 <div class="form-floating"><input type="url" name="map_url" id="edit_map_url"
                                         class="form-control" placeholder="Link"><label class="text-danger">Link Google
-                                        Maps mới (Nếu muốn đổi vị trí)</label></div>
+                                        Maps (Dán đè lên nếu muốn đổi)</label></div>
                             </div>
                             <div class="col-12">
                                 <div class="form-floating"><input type="text" name="address" id="edit_address"
@@ -465,7 +485,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById('edit_district').value = data.district || '';
         document.getElementById('edit_lat').value = data.latitude;
         document.getElementById('edit_lng').value = data.longitude;
-        document.getElementById('edit_map_url').value = '';
+        // Điền lại link gốc vào ô modal để người dùng thấy
+        document.getElementById('edit_map_url').value = data.original_link || '';
     }
     </script>
 </body>
