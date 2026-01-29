@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.2.2
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Jan 29, 2026 at 10:35 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: localhost:3306
+-- Generation Time: Jan 29, 2026 at 05:13 PM
+-- Server version: 10.11.15-MariaDB-cll-lve
+-- PHP Version: 8.4.16
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `my_places_db`
+-- Database: `thanhdat6_thanhdat`
 --
 
 -- --------------------------------------------------------
@@ -115,7 +115,17 @@ INSERT INTO `places` (`id`, `name`, `address`, `description`, `latitude`, `longi
 (48, 'Phê La - Trường Sơn', 'CC 26 + CC27, Đ. Trường Sơn, Phường 15, Quận 10, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h-22h45', 10.78209570, 106.66194480, 5, '2026-01-29 09:09:24', 2, 'Quận 10', 'https://www.google.com/maps/place/Ph%C3%AA+La+-+Tr%C6%B0%E1%BB%9Dng+S%C6%A1n/@10.7820957,106.6619448,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f583292211b:0x9849b3310d2b26fc!8m2!3d10.7820957!4d106.6645251!16s%2Fg%2F11wn5754xp?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (49, 'Bros tea shop', '106 Đ. Nguyễn Hồng Đào, Phường Tân Bình, Tân Bình, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 9h-22h30', 10.79451450, 106.64268920, 5, '2026-01-29 09:10:39', 2, 'Tân Bình', 'https://www.google.com/maps/place/Bros+tea+shop+_+tr%C3%A0+s%E1%BB%AFa+Bros+(+Nguy%E1%BB%85n+H%E1%BB%93ng+%C4%90%C3%A0o+)/@10.7945145,106.6426892,14z/data=!4m10!1m2!2m1!1zYnJvcyB0w6JuIGLDrG5o!3m6!1s0x3175297309db0f8b:0x4c998b8feec84190!8m2!3d10.794543!4d106.6425657!15sCg9icm9zIHTDom4gYsOsbmhaESIPYnJvcyB0w6JuIGLDrG5okgEQYnViYmxlX3RlYV9zdG9yZZoBRENpOURRVWxSUVVOdlpFTm9kSGxqUmpsdlQydGtURTVWU1hkV2JrNHhVVlZLZEdWWGRFcFRNVGxSVXpGdk5GVnNSUkFC4AEA-gEECHAQFA!16s%2Fg%2F11vk685n2v?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (50, 'Jua Coffee and Food', '53 Đ. Kinh Dương Vương, Phường 12, Quận 6, Thành phố Hồ Chí Minh 70000, Việt Nam', 'Mở cửa 7h-23h', 10.75196120, 106.62945850, 5, '2026-01-29 09:11:22', 2, 'Quận 6', 'https://www.google.com/maps/place/Jua+Coffee+and+Food/@10.7519612,106.6294585,17z/data=!3m1!4b1!4m6!3m5!1s0x31752fffbfc23b57:0x86252f76170b5b09!8m2!3d10.7519612!4d106.6320388!16s%2Fg%2F11vc2_c4kg?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
-(51, 'HẸ QUÁN - Bánh canh hẹ', '113 Cao Thắng, Phường 10, Quận 10, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h30-21h30', 10.77277460, 106.67621540, 5, '2026-01-29 09:12:21', 1, 'Quận 10', 'https://www.google.com/maps/place/H%E1%BA%B8+QU%C3%81N+-+B%C3%A1nh+canh+h%E1%BA%B9+_+B%C3%A1nh+b%C3%A8o+n%C3%B3ng+Ph%C3%BA+Y%C3%AAn/@10.7727746,106.6762154,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0715717629:0x21b050446eb31191!8m2!3d10.7727746!4d106.6787957!16s%2Fg%2F11fm_ll_mt?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh');
+(51, 'HẸ QUÁN - Bánh canh hẹ', '113 Cao Thắng, Phường 10, Quận 10, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h30-21h30', 10.77277460, 106.67621540, 5, '2026-01-29 09:12:21', 1, 'Quận 10', 'https://www.google.com/maps/place/H%E1%BA%B8+QU%C3%81N+-+B%C3%A1nh+canh+h%E1%BA%B9+_+B%C3%A1nh+b%C3%A8o+n%C3%B3ng+Ph%C3%BA+Y%C3%AAn/@10.7727746,106.6762154,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0715717629:0x21b050446eb31191!8m2!3d10.7727746!4d106.6787957!16s%2Fg%2F11fm_ll_mt?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(52, 'Còi Cafe-Matcha', '238 Lê Trọng Tấn, Tây Thạnh, Tân Phú, Thành phố Hồ Chí Minh 72000, Việt Nam', 'Chi nhánh 2: 6 Út Tịch, Phường 4, Tân Bình, Thành phố Hồ Chí Minh, Việt Nam', 10.80724880, 106.62143230, 5, '2026-01-29 09:47:16', 2, 'Tân Phú', 'https://www.google.com/maps/place/C%C3%B2i+Cafe/@10.8072488,106.6214323,17z/data=!3m1!4b1!4m6!3m5!1s0x31752b004df45fef:0xf01c7fb4ddc9a231!8m2!3d10.8072488!4d106.6240072!16s%2Fg%2F11xfp9v5f0?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(53, 'Bánh ép O Châu - Tân Bình', '11a Hoàng Hoa Thám, Phường Tân Bình, Tân Bình, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h-22h', 10.79682180, 106.64438000, 5, '2026-01-29 09:48:23', 1, 'Tân Bình', 'https://www.google.com/maps/place/B%C3%A1nh+%C3%A9p+O+Ch%C3%A2u+-+T%C3%A2n+B%C3%ACnh/@10.7968218,106.64438,17z/data=!3m1!4b1!4m6!3m5!1s0x317529005367a05d:0xbd8d030e263b6f2f!8m2!3d10.7968218!4d106.6469549!16s%2Fg%2F11vprshl_m?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(54, 'Kokoria - 3 tháng 2', '207/33 3 Tháng 2, Phường 10, Quận 10, Thành phố Hồ Chí Minh 00700, Việt Nam', 'Mở cửa 10h30-22h | Có chi nhánh Sư Vạn Hạnh', 10.77109270, 106.67203620, 5, '2026-01-29 09:49:23', 1, 'Quận 10', 'https://www.google.com/maps/place/Kokoria/@10.7710927,106.6720362,17z/data=!3m1!4b1!4m6!3m5!1s0x31752ff067f8673d:0x1cd441dc210a95a0!8m2!3d10.7710927!4d106.6746111!16s%2Fg%2F11kmysxrmj?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(55, 'PixelB Vintage Photobooth', '143 Bờ Bao Tân Thắng, Sơn Kỳ, Tân Phú, Thành phố Hồ Chí Minh 700000, Việt Nam', 'Mở cửa 9h-23h', 10.79978880, 106.61301100, 5, '2026-01-29 09:51:20', 3, 'Tân Phú', 'https://www.google.com/maps/place/PixelB+Vintage+Photobooth/@10.7997888,106.613011,17z/data=!3m1!4b1!4m6!3m5!1s0x31752b000c19b4dd:0xef320877e6fc6efe!8m2!3d10.7997888!4d106.6155859!16s%2Fg%2F11ms1bdjlh?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(56, 'PHOTO OBJET Quận 7', 'Crescent Residence 2, Đ. Morison, Khu đô thị Phú Mỹ Hưng, Quận 7, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 9h30-22h', 10.72606560, 106.71789440, 5, '2026-01-29 09:52:14', 3, 'Quận 7', 'https://www.google.com/maps/place/PHOTO+OBJET+Qu%E1%BA%ADn+7/@10.7260656,106.7178944,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0073874247:0x3f2f345de046f78f!8m2!3d10.7260656!4d106.7204693!16s%2Fg%2F11y6xh0zzw?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(57, 'Photo Palette - Quận 1', '10 Huỳnh Thúc Kháng, Bến Nghé, Quận 1, Thành phố Hồ Chí Minh 71000, Việt Nam', 'Mở cửa 9h30-23h', 10.77328380, 106.70022700, 5, '2026-01-29 09:53:08', 3, 'Quận 1', 'https://www.google.com/maps/place/Photo+Palette+-+Qu%E1%BA%ADn+1/@10.7732838,106.700227,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0071e29fc1:0xa46438c8ca944792!8m2!3d10.7732838!4d106.7028019!16s%2Fg%2F11y7gfv4jm?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(58, 'Chong Chóng Bakery - Đồng Nai', '84 Đ. Đồng Nai, Phường 15, Quận 10, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h-22h', 10.77987560, 106.65961790, 5, '2026-01-29 09:54:14', 5, 'Quận 10', 'https://www.google.com/maps/place/Chong+Ch%C3%B3ng+Bakery+-+%C4%90%E1%BB%93ng+Nai/@10.7798756,106.6596179,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f9778acff49:0x572f1cb798e31edb!8m2!3d10.7798756!4d106.6621928!16s%2Fg%2F11w57vwm99?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(59, 'Sữa dừa Tica', '30 Đ. Phạm Quý Thích, Tân Quý, Tân Phú, Thành phố Hồ Chí Minh, Việt Nam', 'Bán mang đi', 10.78786710, 106.62085940, 5, '2026-01-29 09:55:42', 2, 'Tân Phú', 'https://www.google.com/maps/place/S%E1%BB%AFa+d%E1%BB%ABa+Tica/@10.7878671,106.6208594,18.59z/data=!4m6!3m5!1s0x31752d0053d27f53:0x8dabcbcae7981d3a!8m2!3d10.7886267!4d106.6209856!16s%2Fg%2F11md4v939c?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(60, 'NamBa Roastery', '153 Bà Hom, Phường 13, Quận 6, Thành phố Hồ Chí Minh 20000, Việt Nam', 'Mở cửa 7h-19h', 10.75500990, 106.62817820, 5, '2026-01-29 09:59:37', 2, 'Quận 6', 'https://www.google.com/maps/place/NamBa+Roastery/@10.7550099,106.6281782,19z/data=!3m1!4b1!4m6!3m5!1s0x31752d0e9ec99bc5:0xe2b5443cc6453592!8m2!3d10.7550099!4d106.6288219!16s%2Fg%2F11h8krjc0p?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh'),
+(62, 'Wok of love Quận 7', '48 Khu Phố Hưng Phước 2, Tân Phong, Quận 7, Thành phố Hồ Chí Minh 700000, Việt Nam', 'Mở cửa 10h30-00h', 10.73129440, 106.70695450, 5, '2026-01-29 10:03:43', 1, 'Quận 7', 'https://www.google.com/maps/place/Wok+of+love+Qu%E1%BA%ADn+7/@10.7312944,106.7069545,20.45z/data=!4m6!3m5!1s0x31752f72e1ae4369:0x569241ebd2f24d3f!8m2!3d10.7315098!4d106.7067903!16s%2Fg%2F11vsdlh5vc?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA2N0gBUAM%3D', 'Hồ Chí Minh');
 
 -- --------------------------------------------------------
 
@@ -169,13 +179,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `categories`
 --
 ALTER TABLE `categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `places`
 --
 ALTER TABLE `places`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT for table `users`
