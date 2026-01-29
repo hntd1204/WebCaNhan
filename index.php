@@ -119,6 +119,7 @@ $params = [];
 $filterCity = $_GET['filter_city'] ?? '';
 $filterDistrict = $_GET['filter_district'] ?? '';
 $filterCategory = $_GET['filter_category'] ?? '';
+$search = $_GET['search'] ?? '';
 
 if (!empty($filterCity)) {
     $sqlPlace .= " AND places.city = ?";
@@ -131,6 +132,12 @@ if (!empty($filterDistrict)) {
 if (!empty($filterCategory)) {
     $sqlPlace .= " AND places.category_id = ?";
     $params[] = $filterCategory;
+}
+
+if (!empty($search)) {
+    $sqlPlace .= " AND (places.name LIKE ? OR places.address LIKE ?)";
+    $params[] = "%$search%";
+    $params[] = "%$search%";
 }
 
 $sqlPlace .= " ORDER BY places.created_at DESC";
@@ -269,6 +276,15 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
 
                     <form method="GET" class="d-flex flex-column flex-sm-row gap-2 flex-grow-1 justify-content-end">
+
+                        <div class="input-group input-group-sm flex-nowrap" style="min-width: 200px;">
+                            <span class="input-group-text bg-white border-end-0 text-secondary">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control border-start-0 ps-0"
+                                placeholder="Tìm tên quán, địa chỉ..." value="<?= htmlspecialchars($search) ?>">
+                        </div>
+
                         <div class="input-group input-group-sm flex-nowrap">
                             <span class="input-group-text bg-white border-end-0 text-secondary"><i
                                     class="bi bi-building"></i></span>
@@ -306,6 +322,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <?php endforeach; ?>
                             </select>
                         </div>
+
+                        <button type="submit" hidden></button>
                     </form>
                 </div>
 
