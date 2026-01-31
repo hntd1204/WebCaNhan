@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 29, 2026 at 09:08 PM
+-- Generation Time: Jan 31, 2026 at 10:35 PM
 -- Server version: 10.11.15-MariaDB-cll-lve
 -- PHP Version: 8.4.16
 
@@ -41,7 +41,69 @@ INSERT INTO `categories` (`id`, `name`) VALUES
 (7, 'Chỗ ở'),
 (3, 'Giải trí'),
 (1, 'Quán ăn'),
-(2, 'Quán uống');
+(2, 'Quán nước');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cities`
+--
+
+CREATE TABLE `cities` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `cities`
+--
+
+INSERT INTO `cities` (`id`, `name`) VALUES
+(1, 'Hồ Chí Minh'),
+(2, 'Bảo Lộc'),
+(3, 'Vũng Tàu');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `districts`
+--
+
+CREATE TABLE `districts` (
+  `id` int(11) NOT NULL,
+  `city_id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `districts`
+--
+
+INSERT INTO `districts` (`id`, `city_id`, `name`) VALUES
+(1, 1, 'Quận 1'),
+(2, 1, 'Quận 2'),
+(3, 1, 'Quận 3'),
+(4, 1, 'Quận 4'),
+(5, 1, 'Quận 5'),
+(6, 1, 'Quận 6'),
+(7, 1, 'Quận 7'),
+(8, 1, 'Quận 8'),
+(9, 1, 'Quận 9'),
+(10, 1, 'Quận 10'),
+(11, 1, 'Quận 11'),
+(12, 1, 'Quận 12'),
+(13, 1, 'Bình Thạnh'),
+(14, 1, 'Gò Vấp'),
+(15, 1, 'Phú Nhuận'),
+(16, 1, 'Tân Bình'),
+(17, 1, 'Tân Phú'),
+(18, 1, 'Bình Tân'),
+(19, 1, 'TP. Thủ Đức'),
+(20, 1, 'Huyện Bình Chánh'),
+(21, 1, 'Huyện Hóc Môn'),
+(22, 1, 'Huyện Nhà Bè'),
+(23, 1, 'Huyện Củ Chi'),
+(24, 1, 'Huyện Cần Giờ');
 
 -- --------------------------------------------------------
 
@@ -105,7 +167,7 @@ INSERT INTO `places` (`id`, `name`, `address`, `description`, `latitude`, `longi
 (37, 'The Wish Coffee - Sư Vạn Hạnh', '543 Sư Vạn Hạnh, Phường 12, Quận 10, Thành phố Hồ Chí Minh 72511, Việt Nam', '', 10.77569800, 106.65679640, 5, '2026-01-29 08:56:20', 2, 'Quận 10', 'https://www.google.com/maps/place/The+Wish+Coffee+-+543+S%C6%B0+V%E1%BA%A1n+H%E1%BA%A1nh/@10.775698,106.6567964,15z/data=!3m1!4b1!4m6!3m5!1s0x31752f0052909eb3:0xe161acca7ac34798!8m2!3d10.7756982!4d106.6670747!16s%2Fg%2F11xknhnk0w?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (38, 'Asa Coffee', '141 Đường số 19, Bình Trị Đông B, Bình Tân, Thành phố Hồ Chí Minh, Việt Nam', '', 10.75311300, 106.60332180, 5, '2026-01-29 08:57:50', 2, 'Bình Tân', 'https://www.google.com/maps/place/Asa+Coffee/@10.753113,106.6033218,15z/data=!3m1!4b1!4m6!3m5!1s0x31752d964e2dcd1b:0xa145ad0e3ebb8f34!8m2!3d10.7531132!4d106.6136001!16s%2Fg%2F11k48kyyht?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (39, 'KATINAT Bến Bình An', 'Bến ga Waterbus Đ. Số 21, Bình An, Thủ Đức, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 7h-22h30', 10.79715910, 106.72834180, 5, '2026-01-29 08:59:35', 2, 'Quận 2', 'https://www.google.com/maps/place/KATINAT+B%E1%BA%BFn+B%C3%ACnh+An/@10.7971591,106.7283418,19z/data=!4m6!3m5!1s0x3175270035949d01:0x62863478c4e9da2!8m2!3d10.7971589!4d106.728686!16s%2Fg%2F11vz8gnnzg?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
-(40, 'iệm cà phê Thập niên 2000', '125/2B Hoà Hưng, Phường 12, Quận 10, Thành phố Hồ Chí Minh 700000, Việt Nam', 'Mở cửa 7h30-22h30', 10.77821380, 106.66995620, 5, '2026-01-29 09:01:26', 2, 'Quận 10', 'https://www.google.com/maps/place/Ti%E1%BB%87m+c%C3%A0+ph%C3%AA+Th%E1%BA%ADp+ni%C3%AAn+2000/@10.7782138,106.6699562,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f6696cf54ed:0x7b1ddf0978c7c86!8m2!3d10.7782138!4d106.6725365!16s%2Fg%2F11jt02s8st?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(40, 'Tiệm cà phê Thập niên 2000', '125/2B Hoà Hưng, Phường 12, Quận 10, Thành phố Hồ Chí Minh 700000, Việt Nam', 'Mở cửa 7h30-22h30', 10.77821380, 106.66995620, 5, '2026-01-29 09:01:26', 2, 'Quận 10', 'https://www.google.com/maps/place/Ti%E1%BB%87m+c%C3%A0+ph%C3%AA+Th%E1%BA%ADp+ni%C3%AAn+2000/@10.7782138,106.6699562,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f6696cf54ed:0x7b1ddf0978c7c86!8m2!3d10.7782138!4d106.6725365!16s%2Fg%2F11jt02s8st?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (41, 'Win.D Gaming & Billiards Quận 11', '288 Lãnh Binh Thăng, Phường 8, Quận 11, Thành phố Hồ Chí Minh 700000, Việt Nam', 'Mở cửa 24/7', 10.76417620, 106.64633710, 5, '2026-01-29 09:02:11', 3, 'Quận 11', 'https://www.google.com/maps/place/Win.D+Gaming+%26+Billiards+Qu%E1%BA%ADn+11/@10.7641762,106.6463371,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f7dac25d3df:0x47daffb831530b8d!8m2!3d10.7641762!4d106.6489174!16s%2Fg%2F11vsyss95b?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (42, 'LỀ CAFÉ', '98 Đ. Nguyễn Thị Thập, Tân Hưng, Quận 7, Thành phố Hồ Chí Minh 70000, Việt Nam', '', 10.74160800, 106.69243450, 5, '2026-01-29 09:02:45', 2, 'Quận 7', 'https://www.google.com/maps/place/L%E1%BB%80+CAF%C3%89/@10.741608,106.6924345,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f70e6487315:0x9f17257819a93eb7!8m2!3d10.741608!4d106.6950148!16s%2Fg%2F11x7hbvmjp?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (43, 'KIM THUỶ TEA&COFFEE', '74 Ký Con, Phường Nguyễn Thái Bình, Quận 1, Thành phố Hồ Chí Minh, Việt Nam', '', 10.76691220, 106.69897490, 5, '2026-01-29 09:05:08', 2, 'Quận 1', 'https://www.google.com/maps/place/KIM+THU%E1%BB%B6+TEA%26COFFEE/@10.7669122,106.6989749,20.99z/data=!4m6!3m5!1s0x31752f006bdf9a71:0x96c5a4507c47d322!8m2!3d10.7667538!4d106.6989787!16s%2Fg%2F11w_fspcm_?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
@@ -157,7 +219,11 @@ INSERT INTO `places` (`id`, `name`, `address`, `description`, `latitude`, `longi
 (90, 'Bánh Cuốn Huệ', '30 Lê Văn Tám, Phường 2, Bảo Lộc, Lâm Đồng, Việt Nam', '', 11.54663690, 107.80488770, 5, '2026-01-29 14:00:17', 1, '', 'https://www.google.com/maps/place/B%C3%A1nh+Cu%E1%BB%91n+Hu%E1%BB%87/@11.5466369,107.8048877,17z/data=!4m15!1m8!3m7!1s0x3173f7000979da43:0x16db5ab10526dbd9!2zQsOhbmggQ3Xhu5FuIEh14buH!8m2!3d11.5468432!4d107.8049037!10e5!16s%2Fg%2F11y3rlm3rh!3m5!1s0x3173f7000979da43:0x16db5ab10526dbd9!8m2!3d11.5468432!4d107.8049037!16s%2Fg%2F11y3rlm3rh?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA3MUgBUAM%3D', 'Bảo Lộc'),
 (91, 'Đen Coffee', '76/4 Lam Sơn, Lộc Sơn, Bảo Lộc, Lâm Đồng 670000, Việt Nam', 'Mở cửa 8h-22h', 11.52969230, 107.80575550, 5, '2026-01-29 14:01:33', 2, '', 'https://www.google.com/maps/place/%C4%91en+coffee/@11.5296923,107.8057555,15z/data=!4m10!1m2!2m1!1s%C4%91en+coffee!3m6!1s0x3173f740030f1f59:0xceea8c08f944aaa6!8m2!3d11.5296923!4d107.8184142!15sCgvEkWVuIGNvZmZlZVoNIgvEkWVuIGNvZmZlZZIBBGNhZmWaASNDaFpEU1VoTk1HOW5TMFZPVkZwNlRHMVZhRzl0YmtSQkVBReABAPoBBAgAEEU!16s%2Fg%2F11k39hd5t4?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA3MUgBUAM%3D', 'Bảo Lộc'),
 (92, 'Zenda Glamping / Coffee', 'GRC4+QPX, Lộc Sơn, Bảo Lộc, Lâm Đồng 670000, Việt Nam', 'Mở cửa 7h-22h', 11.52203160, 107.80685410, 5, '2026-01-29 14:03:28', 2, '', 'https://www.google.com/maps/place/Zenda+Glamping+-+B%E1%BA%A3o+L%E1%BB%99c+-+L%C3%A2m+%C4%90%E1%BB%93ng/@11.5220316,107.8068541,17z/data=!4m9!3m8!1s0x3173f7be4d46433d:0x520d9c6f44436c2!5m2!4m1!1i2!8m2!3d11.5220392!4d107.8068018!16s%2Fg%2F11kjh2d7y9?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA3MUgBUAM%3D', 'Bảo Lộc'),
-(93, 'Mì né bò - Mì Tươi Bảo Lộc', '22/55 Lý Tự Trọng, Phường 2, Bảo Lộc, Lâm Đồng, Việt Nam', 'Mở cửa 6h30-21h', 11.54949160, 107.80519480, 5, '2026-01-29 14:04:29', 1, '', 'https://www.google.com/maps/place/M%C3%AC+T%C6%B0%C6%A1i+B%E1%BA%A3o+L%E1%BB%99c/@11.5494916,107.8051948,17z/data=!4m15!1m8!3m7!1s0x3173f78a83b8fdbd:0x411c9c3056f02be5!2zTcOsIFTGsMahaSBC4bqjbyBM4buZYw!8m2!3d11.5495399!4d107.8053286!10e9!16s%2Fg%2F11r1m_6fng!3m5!1s0x3173f78a83b8fdbd:0x411c9c3056f02be5!8m2!3d11.5495399!4d107.8053286!16s%2Fg%2F11r1m_6fng?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA3MUgBUAM%3D', 'Bảo Lộc');
+(93, 'Mì né bò - Mì Tươi Bảo Lộc', '22/55 Lý Tự Trọng, Phường 2, Bảo Lộc, Lâm Đồng, Việt Nam', 'Mở cửa 6h30-21h', 11.54949160, 107.80519480, 5, '2026-01-29 14:04:29', 1, '', 'https://www.google.com/maps/place/M%C3%AC+T%C6%B0%C6%A1i+B%E1%BA%A3o+L%E1%BB%99c/@11.5494916,107.8051948,17z/data=!4m15!1m8!3m7!1s0x3173f78a83b8fdbd:0x411c9c3056f02be5!2zTcOsIFTGsMahaSBC4bqjbyBM4buZYw!8m2!3d11.5495399!4d107.8053286!10e9!16s%2Fg%2F11r1m_6fng!3m5!1s0x3173f78a83b8fdbd:0x411c9c3056f02be5!8m2!3d11.5495399!4d107.8053286!16s%2Fg%2F11r1m_6fng?entry=ttu&g_ep=EgoyMDI2MDEyNi4wIKXMDSoKLDEwMDc5MjA3MUgBUAM%3D', 'Bảo Lộc'),
+(94, 'Asa Coffee', '141 Đường số 19, Bình Trị Đông B, Bình Tân, Thành phố Hồ Chí Minh', '', 10.75311320, 106.61360010, 5, '2026-01-31 01:41:37', 2, 'Bình Tân', 'https://www.google.com/maps/place/Asa+Coffee/@10.7531132,106.6136001,17z/data=!3m1!4b1!4m6!3m5!1s0x31752d964e2dcd1b:0xa145ad0e3ebb8f34!8m2!3d10.7531132!4d106.6136001!16s%2Fg%2F11k48kyyht!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(95, 'Mỳ ý cua - Hậu Giang Q6', '128 Đ. Hậu Giang, Phường 2, Quận 6, Thành phố Hồ Chí Minh', '', 10.74988200, 106.64515400, 5, '2026-01-31 10:05:57', 1, 'Quận 6', 'https://www.google.com/maps/place/My%CC%80+y%CC%81+Cua/@10.749882,106.645154,17z/data=!4m14!1m7!3m6!1s0x31752f007006e35f:0xd1fc72605e80c980!2zTXnMgCB5zIEgQ3Vh!8m2!3d10.749882!4d106.645154!16s%2Fg%2F11yjm89lld!3m5!1s0x31752f007006e35f:0xd1fc72605e80c980!8m2!3d10.749882!4d106.645154!16s%2Fg%2F11yjm89lld!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(96, 'Bánh tráng Bình Tiên', '71/1 Đ. Bình Tiên, Phường 7, Quận 6, Thành phố Hồ Chí Minh', 'Mở cửa 11h-23h', 10.74160300, 106.64315800, 5, '2026-01-31 10:08:22', 5, 'Quận 6', 'https://www.google.com/maps/place/B%C3%A1nh+Tr%C3%A1ng+D%E1%BA%BBo+M%E1%BB%81m+Tr%E1%BB%99n/@10.741603,106.643158,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0015a2ad13:0x3fd3f74892071f2c!8m2!3d10.741603!4d106.643158!16s%2Fg%2F11yhg5mc06!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(97, 'Vách-Tô tượng trà trái cây', '152/32 Lạc Long Quân, Phường 3, Quận 11, Thành phố Hồ Chí Minh', 'Mở cửa 16h-23h', 10.75945560, 106.63816070, 5, '2026-01-31 13:49:49', 3, 'Quận 11', 'https://www.google.com/maps/place/V%C3%81CH+Tr%C3%A0+tr%C3%A1i+c%C3%A2y+kh%C3%B4ng+siro/@10.7594556,106.6381607,17z/data=!3m1!4b1!4m6!3m5!1s0x31752fd4314cf309:0x4d99451ad87b4f7d!8m2!3d10.7594556!4d106.6381607!16s%2Fg%2F11wjnyclp1!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh');
 
 -- --------------------------------------------------------
 
@@ -191,6 +257,19 @@ ALTER TABLE `categories`
   ADD UNIQUE KEY `name` (`name`);
 
 --
+-- Indexes for table `cities`
+--
+ALTER TABLE `cities`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `districts`
+--
+ALTER TABLE `districts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `city_id` (`city_id`);
+
+--
 -- Indexes for table `places`
 --
 ALTER TABLE `places`
@@ -214,16 +293,38 @@ ALTER TABLE `categories`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
+-- AUTO_INCREMENT for table `cities`
+--
+ALTER TABLE `cities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `districts`
+--
+ALTER TABLE `districts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
 -- AUTO_INCREMENT for table `places`
 --
 ALTER TABLE `places`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=94;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `districts`
+--
+ALTER TABLE `districts`
+  ADD CONSTRAINT `districts_ibfk_1` FOREIGN KEY (`city_id`) REFERENCES `cities` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
