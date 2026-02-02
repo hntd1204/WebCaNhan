@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jan 31, 2026 at 10:35 PM
+-- Generation Time: Feb 02, 2026 at 11:27 PM
 -- Server version: 10.11.15-MariaDB-cll-lve
 -- PHP Version: 8.4.16
 
@@ -61,7 +61,8 @@ CREATE TABLE `cities` (
 INSERT INTO `cities` (`id`, `name`) VALUES
 (1, 'Hồ Chí Minh'),
 (2, 'Bảo Lộc'),
-(3, 'Vũng Tàu');
+(3, 'Vũng Tàu'),
+(4, 'Đà Lạt');
 
 -- --------------------------------------------------------
 
@@ -223,7 +224,18 @@ INSERT INTO `places` (`id`, `name`, `address`, `description`, `latitude`, `longi
 (94, 'Asa Coffee', '141 Đường số 19, Bình Trị Đông B, Bình Tân, Thành phố Hồ Chí Minh', '', 10.75311320, 106.61360010, 5, '2026-01-31 01:41:37', 2, 'Bình Tân', 'https://www.google.com/maps/place/Asa+Coffee/@10.7531132,106.6136001,17z/data=!3m1!4b1!4m6!3m5!1s0x31752d964e2dcd1b:0xa145ad0e3ebb8f34!8m2!3d10.7531132!4d106.6136001!16s%2Fg%2F11k48kyyht!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (95, 'Mỳ ý cua - Hậu Giang Q6', '128 Đ. Hậu Giang, Phường 2, Quận 6, Thành phố Hồ Chí Minh', '', 10.74988200, 106.64515400, 5, '2026-01-31 10:05:57', 1, 'Quận 6', 'https://www.google.com/maps/place/My%CC%80+y%CC%81+Cua/@10.749882,106.645154,17z/data=!4m14!1m7!3m6!1s0x31752f007006e35f:0xd1fc72605e80c980!2zTXnMgCB5zIEgQ3Vh!8m2!3d10.749882!4d106.645154!16s%2Fg%2F11yjm89lld!3m5!1s0x31752f007006e35f:0xd1fc72605e80c980!8m2!3d10.749882!4d106.645154!16s%2Fg%2F11yjm89lld!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
 (96, 'Bánh tráng Bình Tiên', '71/1 Đ. Bình Tiên, Phường 7, Quận 6, Thành phố Hồ Chí Minh', 'Mở cửa 11h-23h', 10.74160300, 106.64315800, 5, '2026-01-31 10:08:22', 5, 'Quận 6', 'https://www.google.com/maps/place/B%C3%A1nh+Tr%C3%A1ng+D%E1%BA%BBo+M%E1%BB%81m+Tr%E1%BB%99n/@10.741603,106.643158,17z/data=!3m1!4b1!4m6!3m5!1s0x31752f0015a2ad13:0x3fd3f74892071f2c!8m2!3d10.741603!4d106.643158!16s%2Fg%2F11yhg5mc06!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
-(97, 'Vách-Tô tượng trà trái cây', '152/32 Lạc Long Quân, Phường 3, Quận 11, Thành phố Hồ Chí Minh', 'Mở cửa 16h-23h', 10.75945560, 106.63816070, 5, '2026-01-31 13:49:49', 3, 'Quận 11', 'https://www.google.com/maps/place/V%C3%81CH+Tr%C3%A0+tr%C3%A1i+c%C3%A2y+kh%C3%B4ng+siro/@10.7594556,106.6381607,17z/data=!3m1!4b1!4m6!3m5!1s0x31752fd4314cf309:0x4d99451ad87b4f7d!8m2!3d10.7594556!4d106.6381607!16s%2Fg%2F11wjnyclp1!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh');
+(97, 'Vách-Tô tượng trà trái cây', '152/32 Lạc Long Quân, Phường 3, Quận 11, Thành phố Hồ Chí Minh', 'Mở cửa 16h-23h', 10.75945560, 106.63816070, 5, '2026-01-31 13:49:49', 3, 'Quận 11', 'https://www.google.com/maps/place/V%C3%81CH+Tr%C3%A0+tr%C3%A1i+c%C3%A2y+kh%C3%B4ng+siro/@10.7594556,106.6381607,17z/data=!3m1!4b1!4m6!3m5!1s0x31752fd4314cf309:0x4d99451ad87b4f7d!8m2!3d10.7594556!4d106.6381607!16s%2Fg%2F11wjnyclp1!18m1!1e1?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(98, 'Tiệm cà phê Nhà Bên Suối', '3 Trúc Lâm Yên Tử, Phường 3, Đà Lạt, Lâm Đồng 670000, Việt Nam', 'Mở cửa 7h-18h30', 11.90268210, 108.44305920, 5, '2026-02-02 14:27:58', 2, '', 'https://www.google.com/maps/place/Ti%E1%BB%87m+c%C3%A0+ph%C3%AA+Nh%C3%A0+B%C3%AAn+Su%E1%BB%91i/@11.9026821,108.4430592,17z/data=!4m20!1m10!3m9!1s0x3171155c6580d69f:0xa20caeddd1448e8e!2zVGnhu4dtIGPDoCBwaMOqIE5ow6AgQsOqbiBTdeG7kWk!5m2!4m1!1i2!8m2!3d11.9022833!4d108.444353!16s%2Fg%2F11q21hw7k4!3m8!1s0x3171155c6580d69f:0xa20caeddd1448e8e!5m2!4m1!1i2!8m2!3d11.9022833!4d108.444353!16s%2Fg%2F11q21hw7k4?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(99, 'Bánh mì xíu mại Bé Linh', '37 Đ. Hoàng Diệu, Phường 5, Đà Lạt, Lâm Đồng 66000, Việt Nam', 'Mở cửa 5h30-12h', 11.94247930, 108.42594550, 5, '2026-02-02 14:32:23', 1, '', 'https://www.google.com/maps/place/B%C3%A1nh+m%C3%AC+x%C3%ADu+m%E1%BA%A1i+B%C3%A9+Linh/@11.9424793,108.4259455,17z/data=!3m1!4b1!4m6!3m5!1s0x3171139e3197f9f1:0xb5a321e0d297523a!8m2!3d11.9424741!4d108.4285204!16s%2Fg%2F11v0c8p6nb?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(100, 'Cafe persimmon', '96b Đ. Hùng Vương, Phường 9, Đà Lạt, Lâm Đồng, Việt Nam', 'Mở cửa 7h-20h30', 11.94739640, 108.47075590, 5, '2026-02-02 14:33:01', 2, '', 'https://www.google.com/maps/place/Cafe+persimmon/@11.9473964,108.4707559,17z/data=!3m1!4b1!4m6!3m5!1s0x3171135353f08715:0x4b720973b4905032!8m2!3d11.9473912!4d108.4733308!16s%2Fg%2F11m_ltt72p?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(101, 'Nem nướng Bà Hùng', 'D51 & D52, Khu Quy Hoạch Hoàng Văn Thụ, Phường 4, Đà Lạt, Lâm Đồng 66115, Việt Nam', 'Mở cửa 9h-21h', 11.93742160, 108.42669630, 5, '2026-02-02 14:34:10', 1, '', 'https://www.google.com/maps/place/Nem+n%C6%B0%E1%BB%9Bng+B%C3%A0+H%C3%B9ng/@11.9374216,108.4266963,17z/data=!3m1!4b1!4m6!3m5!1s0x317113c91ba39fc3:0xf85e4a96124b0ca8!8m2!3d11.9374164!4d108.4292712!16s%2Fg%2F11lkff08br?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(102, 'Làng Khét Đà Lạt', '27 Huỳnh Tấn Phát, Phường 11, Đà Lạt, Lâm Đồng 66000, Việt Nam', 'Mở cửa 16h30-22h', 11.95340640, 108.48891420, 5, '2026-02-02 14:34:51', 1, '', 'https://www.google.com/maps/place/L%C3%A0ng+Kh%C3%A9t+%C4%90%C3%A0+L%E1%BA%A1t/@11.9534064,108.4889142,17z/data=!3m1!4b1!4m6!3m5!1s0x31711350fc831e4b:0x5f450600a57c1f99!8m2!3d11.9534012!4d108.4914891!16s%2Fg%2F11t7mhwbrv?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(103, 'Tao Ngộ Quán - Lẩu Gà Lá É', '10Bis Ba Tháng Tư, Phường 3, Đà Lạt, Lâm Đồng, Việt Nam', 'Mở cửa 8h-22h', 11.93162160, 108.44214730, 5, '2026-02-02 14:36:07', 1, '', 'https://www.google.com/maps/place/Tao+Ng%E1%BB%99+Qu%C3%A1n+-+L%E1%BA%A9u+G%C3%A0+L%C3%A1+%C3%89/@11.9316216,108.4421473,16z/data=!4m6!3m5!1s0x317113da5837b369:0x1c65e2a1c4583019!8m2!3d11.9315475!4d108.4460606!16s%2Fg%2F11fqbk8qs9?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(104, 'Ollin Café', '9 Đ. Nguyễn Chí Thanh, Phường 1, Đà Lạt, Lâm Đồng, Việt Nam', 'Mở cửa 6h30-22h30', 11.94139130, 108.43401220, 5, '2026-02-02 14:36:52', 2, '', 'https://www.google.com/maps/place/Ollin+Caf%C3%A9/@11.9413913,108.4340122,17z/data=!3m1!4b1!4m6!3m5!1s0x3171130009eda09f:0x55ee27fce0bf76e2!8m2!3d11.9413861!4d108.4365871!16s%2Fg%2F11xfsn6tbz?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Đà Lạt'),
+(105, 'Củi Bistro Bar', 'Sân thượng, Y12 Đ. Hồng Lĩnh, Cư xá Bắc Hải, Quận 10, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 17h-1h', 10.78035830, 106.66123510, 5, '2026-02-02 14:45:29', 3, 'Quận 10', 'https://www.google.com/maps/place/C%E1%BB%A7i+Bistro+Bar/@10.7803583,106.6612351,17z/data=!4m14!1m7!3m6!1s0x31752f0d0740b711:0xb0a23fa22a444dbe!2sC%E1%BB%A7i+Bistro+Bar!8m2!3d10.780353!4d106.66381!16s%2Fg%2F11sw_1hdjr!3m5!1s0x31752f0d0740b711:0xb0a23fa22a444dbe!8m2!3d10.780353!4d106.66381!16s%2Fg%2F11sw_1hdjr?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh');
+INSERT INTO `places` (`id`, `name`, `address`, `description`, `latitude`, `longitude`, `rating`, `created_at`, `category_id`, `district`, `original_link`, `city`) VALUES
+(106, 'Dimsum Mr. Hào', '175 Trần Tuấn Khải, Phường 5, Quận 5, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 16h30-22h', 10.75272730, 106.67370290, 5, '2026-02-02 14:48:25', 1, 'Quận 5', 'https://www.google.com/maps/place/Dimsum+Mr.+H%C3%A0o/@10.7527273,106.6737029,17z/data=!4m15!1m8!3m7!1s0x31752efdd5e22181:0xfaf341b8b517ff3f!2sDimsum+Mr.+H%C3%A0o!8m2!3d10.7526471!4d106.6735571!10e5!16s%2Fg%2F11c32bckdy!3m5!1s0x31752efdd5e22181:0xfaf341b8b517ff3f!8m2!3d10.7526471!4d106.6735571!16s%2Fg%2F11c32bckdy?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh'),
+(107, 'Há Cảo Minh Ký', '76 Đ. Nguyễn Thời Trung, Phường 5, Quận 5, Thành phố Hồ Chí Minh, Việt Nam', 'Mở cửa 15h30-21h30', 10.75242070, 106.66984500, 5, '2026-02-02 14:49:34', 1, 'Quận 5', 'https://www.google.com/maps/place/H%C3%A1+C%E1%BA%A3o+Minh+K%C3%BD/@10.7524207,106.669845,21z/data=!4m15!1m8!3m7!1s0x31752efdd5e22181:0xfaf341b8b517ff3f!2sDimsum+Mr.+H%C3%A0o!8m2!3d10.7526471!4d106.6735571!10e5!16s%2Fg%2F11c32bckdy!3m5!1s0x31752ef956d88c8f:0x14ef044954361e3a!8m2!3d10.7524092!4d106.6698776!16s%2Fg%2F11c432cpxq?entry=ttu&g_ep=EgoyMDI2MDEyOC4wIKXMDSoASAFQAw%3D%3D', 'Hồ Chí Minh');
 
 -- --------------------------------------------------------
 
@@ -296,7 +308,7 @@ ALTER TABLE `categories`
 -- AUTO_INCREMENT for table `cities`
 --
 ALTER TABLE `cities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `districts`
@@ -308,7 +320,7 @@ ALTER TABLE `districts`
 -- AUTO_INCREMENT for table `places`
 --
 ALTER TABLE `places`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=98;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
 
 --
 -- AUTO_INCREMENT for table `users`

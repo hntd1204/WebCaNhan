@@ -111,6 +111,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: index.php");
         exit;
     }
+
+    // --- [MỚI] 6. Thêm Thành phố ---
+    if (isset($_POST['action']) && $_POST['action'] == 'add_city') {
+        $stmt = $pdo->prepare("INSERT INTO cities (name) VALUES (?)");
+        $stmt->execute([trim($_POST['city_name'])]);
+        header("Location: index.php");
+        exit;
+    }
+
+    // --- [MỚI] 7. Thêm Quận/Huyện ---
+    if (isset($_POST['action']) && $_POST['action'] == 'add_district') {
+        $stmt = $pdo->prepare("INSERT INTO districts (city_id, name) VALUES (?, ?)");
+        $stmt->execute([$_POST['city_id'], trim($_POST['district_name'])]);
+        header("Location: index.php");
+        exit;
+    }
 }
 
 // --- XỬ LÝ GET XÓA (QUAN TRỌNG: CHẶN NẾU KHÔNG PHẢI ADMIN) ---
@@ -238,6 +254,15 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                     value="<?= $city ?>"><?= $city ?></option><?php endforeach; ?>
                                             </select>
                                             <label>Thành phố</label>
+
+                                            <div class="position-absolute top-50 end-0 translate-middle-y me-2">
+                                                <button class="btn btn-sm btn-light border" type="button"
+                                                    data-bs-toggle="modal" data-bs-target="#locModal"
+                                                    title="Thêm khu vực">
+                                                    <i class="bi bi-gear"></i>
+                                                </button>
+                                            </div>
+
                                         </div>
                                     </div>
                                     <div class="col-12 col-md-6">
@@ -480,6 +505,55 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <div class="modal fade" id="locModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold"><i class="bi bi-map-fill me-2"></i>Quản lý Khu vực</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    <h6 class="text-dark fw-bold mb-2">1. Thêm Thành phố mới</h6>
+                    <form method="POST" class="d-flex gap-2 mb-4 pb-4 border-bottom">
+                        <input type="hidden" name="action" value="add_city">
+                        <input type="text" name="city_name" class="form-control" required
+                            placeholder="Nhập tên TP (VD: Đà Lạt)...">
+                        <button type="submit" class="btn btn-success text-nowrap px-3 fw-bold">Thêm</button>
+                    </form>
+
+                    <h6 class="text-dark fw-bold mb-2">2. Thêm Quận/Huyện vào Thành phố</h6>
+                    <form method="POST" class="row g-2 align-items-center">
+                        <input type="hidden" name="action" value="add_district">
+
+                        <div class="col-5">
+                            <select name="city_id" class="form-select" required>
+                                <option value="">-- Chọn TP --</option>
+                                <?php foreach ($dbCities as $c): ?>
+                                <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="col-5">
+                            <input type="text" name="district_name" class="form-control" required
+                                placeholder="Tên Quận/Huyện...">
+                        </div>
+
+                        <div class="col-2">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold"><i
+                                    class="bi bi-plus-lg"></i></button>
+                        </div>
+                    </form>
+
+                    <div class="mt-3 text-muted small fst-italic">
+                        * Lưu ý: Sau khi thêm, trang sẽ tải lại để cập nhật dữ liệu.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="editModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -704,4 +778,4 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </script>
 </body>
 
-</html>
+</html>d
