@@ -409,31 +409,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         ?>
                     <div class="col-md-6 col-xl-6">
                         <div class="card place-card h-100">
-                            <?php if ($isAdmin): ?>
-                            <div class="action-buttons">
-                                <button class="btn-action btn-edit" data-bs-toggle="modal" data-bs-target="#editModal"
-                                    onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)"><i
-                                        class="bi bi-pencil-fill"></i></button>
-                                <a href="index.php?action=delete&id=<?= $place['id'] ?>" class="btn-action btn-delete"
-                                    onclick="return confirm('Bạn chắc chắn muốn xóa?');"><i
-                                        class="bi bi-trash-fill"></i></a>
-                            </div>
-                            <?php endif; ?>
-
-                            <div class="card-map-header">
-                                <?php if ($place['latitude']): ?>
-                                <iframe class="map-iframe" style="pointer-events: none;" loading="lazy"
-                                    src="https://maps.google.com/maps?q=<?= $place['latitude'] ?>,<?= $place['longitude'] ?>&hl=vi&z=16&output=embed"></iframe>
-                                <?php else: ?>
-                                <div class="no-map-placeholder"><i
-                                        class="bi bi-map-fill fs-1 mb-2 opacity-50"></i><span>Chưa có bản đồ</span>
-                                </div>
-                                <?php endif; ?>
-                                <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
-                                    class="stretched-link"></a>
-                            </div>
-
-                            <div class="place-card-body d-flex flex-column">
+                            <div class="place-card-body d-flex flex-column h-100">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
                                         <span
@@ -441,20 +417,46 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <span
                                             class="badge bg-light text-dark border ms-1"><?= htmlspecialchars(($place['city'] == 'Hồ Chí Minh' ? 'HCM' : $place['city']) . ' - ' . $place['district']) ?></span>
                                     </div>
-                                    <div class="text-warning small">
-                                        <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?></div>
+                                    <div class="d-flex flex-column align-items-end">
+                                        <div class="text-warning small mb-1">
+                                            <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?>
+                                        </div>
+                                        <?php if ($isAdmin): ?>
+                                        <div class="d-flex gap-1 mt-1">
+                                            <button class="btn btn-sm btn-light border text-primary px-2 py-0"
+                                                data-bs-toggle="modal" data-bs-target="#editModal"
+                                                onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)"
+                                                title="Sửa"><i class="bi bi-pencil-fill"></i></button>
+                                            <a href="index.php?action=delete&id=<?= $place['id'] ?>"
+                                                class="btn btn-sm btn-light border text-danger px-2 py-0"
+                                                onclick="return confirm('Bạn chắc chắn muốn xóa?');" title="Xóa"><i
+                                                    class="bi bi-trash-fill"></i></a>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
-                                <h5 class="place-title fw-bold text-truncate"><?= htmlspecialchars($place['name']) ?>
-                                </h5>
-                                <p class="place-address mb-2 text-truncate"><i
+
+                                <h5 class="place-title fw-bold text-truncate"
+                                    title="<?= htmlspecialchars($place['name']) ?>">
+                                    <?= htmlspecialchars($place['name']) ?></h5>
+                                <p class="place-address mb-2 text-truncate"
+                                    title="<?= htmlspecialchars($place['address']) ?>"><i
                                         class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i> <span
                                         class="text-truncate"><?= htmlspecialchars($place['address'] ?: 'Chưa cập nhật địa chỉ') ?></span>
                                 </p>
+
                                 <?php if (!empty($place['description'])): ?>
-                                <div class="place-note mt-auto"><i
+                                <div class="place-note"><i
                                         class="bi bi-quote me-1 opacity-50"></i><?= htmlspecialchars($place['description']) ?>
                                 </div>
-                                <?php else: ?><div class="mt-auto"></div><?php endif; ?>
+                                <?php endif; ?>
+
+                                <div class="mt-auto pt-3">
+                                    <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
+                                        class="btn btn-outline-danger w-100 fw-bold">
+                                        <i class="bi bi-map-fill me-2"></i> Xem trên bản đồ
+                                    </a>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -778,4 +780,4 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </script>
 </body>
 
-</html>d
+</html>
