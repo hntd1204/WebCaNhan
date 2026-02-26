@@ -229,19 +229,19 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="style.css">
 
     <style>
-    /* CSS cho hiệu ứng hover ảnh mượt mà ở trang chủ */
-    .thumbnail-wrapper {
-        cursor: pointer;
-    }
+        /* CSS cho hiệu ứng hover ảnh mượt mà ở trang chủ */
+        .thumbnail-wrapper {
+            cursor: pointer;
+        }
 
-    .thumbnail-wrapper .place-thumbnail {
-        transition: transform 0.4s ease, opacity 0.4s ease;
-    }
+        .thumbnail-wrapper .place-thumbnail {
+            transition: transform 0.4s ease, opacity 0.4s ease;
+        }
 
-    .thumbnail-wrapper:hover .place-thumbnail {
-        transform: scale(1.08);
-        opacity: 1 !important;
-    }
+        .thumbnail-wrapper:hover .place-thumbnail {
+            transform: scale(1.08);
+            opacity: 1 !important;
+        }
     </style>
 </head>
 
@@ -255,11 +255,11 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             <div class="d-flex align-items-center gap-2">
                 <?php if ($isLoggedIn): ?>
-                <span class="d-none d-sm-inline">Chào, <b><?= htmlspecialchars($_SESSION['username']) ?></b>
-                    (<?= $isAdmin ? 'Admin' : 'Xem' ?>)</span>
-                <a href="index.php?action=logout" class="btn btn-sm btn-outline-danger fw-bold">Thoát</a>
+                    <span class="d-none d-sm-inline">Chào, <b><?= htmlspecialchars($_SESSION['username']) ?></b>
+                        (<?= $isAdmin ? 'Admin' : 'Xem' ?>)</span>
+                    <a href="index.php?action=logout" class="btn btn-sm btn-outline-danger fw-bold">Thoát</a>
                 <?php else: ?>
-                <a href="login.php" class="btn btn-sm btn-primary fw-bold">Đăng nhập</a>
+                    <a href="login.php" class="btn btn-sm btn-primary fw-bold">Đăng nhập</a>
                 <?php endif; ?>
             </div>
         </div>
@@ -269,116 +269,116 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <div class="row g-4">
             <div class="col-lg-4">
                 <?php if ($isAdmin): ?>
-                <button class="btn btn-primary w-100 mb-3 d-lg-none btn-mobile-toggle fw-bold" type="button"
-                    data-bs-toggle="collapse" data-bs-target="#formCollapse">
-                    <i class="bi bi-plus-circle-fill me-2"></i> Viết Check-in Mới
-                </button>
+                    <button class="btn btn-primary w-100 mb-3 d-lg-none btn-mobile-toggle fw-bold" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#formCollapse">
+                        <i class="bi bi-plus-circle-fill me-2"></i> Viết Check-in Mới
+                    </button>
 
-                <div class="collapse d-lg-block" id="formCollapse">
-                    <div class="card card-form sticky-lg-top" style="top: 90px; z-index: 10;">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-pen text-primary me-2"></i>Check-in</h5>
-                            <button type="button" class="btn-close d-lg-none" data-bs-toggle="collapse"
-                                data-bs-target="#formCollapse"></button>
-                        </div>
-                        <div class="card-body">
-                            <form method="POST" enctype="multipart/form-data">
-                                <input type="hidden" name="action" value="add_place">
-                                <div class="form-floating mb-3">
-                                    <input type="text" name="name" class="form-control" id="floatingName" required
-                                        placeholder="Tên quán">
-                                    <label for="floatingName">Tên địa điểm / Quán ăn</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <select name="category_id" class="form-select" id="floatingCat">
-                                        <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
-                                            <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
-                                    </select>
-                                    <label for="floatingCat">Danh mục</label>
-                                    <div class="position-absolute top-50 end-0 translate-middle-y me-2">
-                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="modal"
-                                            data-bs-target="#catModal"><i class="bi bi-gear"></i></button>
+                    <div class="collapse d-lg-block" id="formCollapse">
+                        <div class="card card-form sticky-lg-top" style="top: 90px; z-index: 10;">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-pen text-primary me-2"></i>Check-in</h5>
+                                <button type="button" class="btn-close d-lg-none" data-bs-toggle="collapse"
+                                    data-bs-target="#formCollapse"></button>
+                            </div>
+                            <div class="card-body">
+                                <form method="POST" enctype="multipart/form-data">
+                                    <input type="hidden" name="action" value="add_place">
+                                    <div class="form-floating mb-3">
+                                        <input type="text" name="name" class="form-control" id="floatingName" required
+                                            placeholder="Tên quán">
+                                        <label for="floatingName">Tên địa điểm / Quán ăn</label>
                                     </div>
-                                </div>
-                                <div class="row g-2 mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <div class="form-floating">
-                                            <select name="city" class="form-select" id="add_city"
-                                                onchange="updateDistricts('add_city', 'add_district')">
-                                                <?php foreach (array_keys($locations) as $city): ?><option
-                                                    value="<?= $city ?>"><?= $city ?></option><?php endforeach; ?>
-                                            </select>
-                                            <label>Thành phố</label>
+                                    <div class="form-floating mb-3">
+                                        <select name="category_id" class="form-select" id="floatingCat">
+                                            <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
+                                                    <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
+                                        </select>
+                                        <label for="floatingCat">Danh mục</label>
+                                        <div class="position-absolute top-50 end-0 translate-middle-y me-2">
+                                            <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="modal"
+                                                data-bs-target="#catModal"><i class="bi bi-gear"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-floating">
+                                                <select name="city" class="form-select" id="add_city"
+                                                    onchange="updateDistricts('add_city', 'add_district')">
+                                                    <?php foreach (array_keys($locations) as $city): ?><option
+                                                            value="<?= $city ?>"><?= $city ?></option><?php endforeach; ?>
+                                                </select>
+                                                <label>Thành phố</label>
 
-                                            <div class="position-absolute top-50 end-0 translate-middle-y me-2">
-                                                <button class="btn btn-sm btn-light border" type="button"
-                                                    data-bs-toggle="modal" data-bs-target="#locModal"
-                                                    title="Thêm khu vực">
-                                                    <i class="bi bi-gear"></i>
-                                                </button>
+                                                <div class="position-absolute top-50 end-0 translate-middle-y me-2">
+                                                    <button class="btn btn-sm btn-light border" type="button"
+                                                        data-bs-toggle="modal" data-bs-target="#locModal"
+                                                        title="Thêm khu vực">
+                                                        <i class="bi bi-gear"></i>
+                                                    </button>
+                                                </div>
+
                                             </div>
-
+                                        </div>
+                                        <div class="col-12 col-md-6">
+                                            <div class="form-floating">
+                                                <select name="district" class="form-select" id="add_district">
+                                                    <option value="">-- Chọn TP trước --</option>
+                                                </select>
+                                                <label>Quận / Huyện</label>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-12 col-md-6">
-                                        <div class="form-floating">
-                                            <select name="district" class="form-select" id="add_district">
-                                                <option value="">-- Chọn TP trước --</option>
-                                            </select>
-                                            <label>Quận / Huyện</label>
-                                        </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="url" name="map_url" class="form-control" id="floatingLink" required
+                                            placeholder="Link Map">
+                                        <label for="floatingLink"><i class="bi bi-link-45deg text-danger me-1"></i> Dán link
+                                            Google Map</label>
                                     </div>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input type="url" name="map_url" class="form-control" id="floatingLink" required
-                                        placeholder="Link Map">
-                                    <label for="floatingLink"><i class="bi bi-link-45deg text-danger me-1"></i> Dán link
-                                        Google Map</label>
-                                </div>
-                                <div class="form-floating mb-3">
-                                    <input type="text" name="address" class="form-control" id="floatingAddress"
-                                        placeholder="Địa chỉ">
-                                    <label for="floatingAddress">Địa chỉ chi tiết</label>
-                                </div>
+                                    <div class="form-floating mb-3">
+                                        <input type="text" name="address" class="form-control" id="floatingAddress"
+                                            placeholder="Địa chỉ">
+                                        <label for="floatingAddress">Địa chỉ chi tiết</label>
+                                    </div>
 
-                                <div class="mb-3 p-2 border rounded bg-light">
-                                    <label class="form-label fw-bold text-success mb-1"><i
-                                            class="bi bi-upload me-1"></i> Tải ảnh lên (Chọn nhiều ảnh)</label>
-                                    <input type="file" name="upload_images[]"
-                                        class="form-control bg-white form-control-sm" multiple accept="image/*">
-                                </div>
+                                    <div class="mb-3 p-2 border rounded bg-light">
+                                        <label class="form-label fw-bold text-success mb-1"><i
+                                                class="bi bi-upload me-1"></i> Tải ảnh lên (Chọn nhiều ảnh)</label>
+                                        <input type="file" name="upload_images[]"
+                                            class="form-control bg-white form-control-sm" multiple accept="image/*">
+                                    </div>
 
-                                <div class="form-floating mb-3">
-                                    <select name="rating" class="form-select" id="floatingRating">
-                                        <option value="5">⭐⭐⭐⭐⭐ (5 - Tuyệt vời)</option>
-                                        <option value="4">⭐⭐⭐⭐ (4 - Ngon)</option>
-                                        <option value="3">⭐⭐⭐ (3 - Ổn)</option>
-                                        <option value="2">⭐⭐ (2 - Tệ)</option>
-                                        <option value="1">⭐ (1 - Rất tệ)</option>
-                                    </select>
-                                    <label for="floatingRating">Đánh giá</label>
-                                </div>
-                                <div class="form-floating mb-4">
-                                    <textarea name="description" class="form-control" id="floatingDesc"
-                                        style="height: 100px" placeholder="Ghi chú"></textarea>
-                                    <label for="floatingDesc">Ghi chú (Món ngon, giá cả...)</label>
-                                </div>
-                                <button type="submit" class="btn btn-primary w-100 py-3 fs-5 shadow-sm"><i
-                                        class="bi bi-cloud-arrow-up-fill me-2"></i> Lưu Lại Ngay</button>
-                            </form>
+                                    <div class="form-floating mb-3">
+                                        <select name="rating" class="form-select" id="floatingRating">
+                                            <option value="5">⭐⭐⭐⭐⭐ (5 - Tuyệt vời)</option>
+                                            <option value="4">⭐⭐⭐⭐ (4 - Ngon)</option>
+                                            <option value="3">⭐⭐⭐ (3 - Ổn)</option>
+                                            <option value="2">⭐⭐ (2 - Tệ)</option>
+                                            <option value="1">⭐ (1 - Rất tệ)</option>
+                                        </select>
+                                        <label for="floatingRating">Đánh giá</label>
+                                    </div>
+                                    <div class="form-floating mb-4">
+                                        <textarea name="description" class="form-control" id="floatingDesc"
+                                            style="height: 100px" placeholder="Ghi chú"></textarea>
+                                        <label for="floatingDesc">Ghi chú (Món ngon, giá cả...)</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary w-100 py-3 fs-5 shadow-sm"><i
+                                            class="bi bi-cloud-arrow-up-fill me-2"></i> Lưu Lại Ngay</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
                 <?php else: ?>
-                <div class="alert alert-info shadow-sm sticky-top mt-3" style="top: 90px;">
-                    <h5 class="fw-bold mb-2">
-                        <i class="bi bi-info-circle-fill me-2"></i>Thông báo
-                    </h5>
-                    <p class="mb-2">Bạn đang ở chế độ <b>Xem</b>. Vui lòng <a href="login.php"
-                            class="fw-bold text-primary">Đăng nhập Admin</a> để thêm hoặc chỉnh sửa địa điểm.</p>
-                    <hr class="my-2">
-                    <p class="mb-0 text-warning fw-semibold">🔔 Lưu ý: Vui lòng lọc xong mới quay random nếu dùng!</p>
-                </div>
+                    <div class="alert alert-info shadow-sm sticky-top mt-3" style="top: 90px;">
+                        <h5 class="fw-bold mb-2">
+                            <i class="bi bi-info-circle-fill me-2"></i>Thông báo
+                        </h5>
+                        <p class="mb-2">Bạn đang ở chế độ <b>Xem</b>. Vui lòng <a href="login.php"
+                                class="fw-bold text-primary">Đăng nhập Admin</a> để thêm hoặc chỉnh sửa địa điểm.</p>
+                        <hr class="my-2">
+                        <p class="mb-0 text-warning fw-semibold">🔔 Lưu ý: Vui lòng lọc xong mới quay random nếu dùng!</p>
+                    </div>
                 <?php endif; ?>
             </div>
 
@@ -389,15 +389,15 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <h5 class="mb-0 fw-bold text-dark text-nowrap">Danh sách (<?= count($places) ?>)</h5>
 
                         <?php if (!empty($places)): ?>
-                        <button class="btn btn-warning btn-sm fw-bold shadow-sm rounded-pill px-3 py-2 text-dark"
-                            data-bs-toggle="modal" data-bs-target="#wheelModal">
-                            <i class="bi bi-compass-fill me-1"></i> Random
-                        </button>
+                            <button class="btn btn-warning btn-sm fw-bold shadow-sm rounded-pill px-3 py-2 text-dark"
+                                data-bs-toggle="modal" data-bs-target="#wheelModal">
+                                <i class="bi bi-compass-fill me-1"></i> Random
+                            </button>
                         <?php endif; ?>
 
                         <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory) || !empty($search)): ?>
-                        <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
-                                class="bi bi-x-lg me-1"></i> Xóa lọc</a>
+                            <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
+                                    class="bi bi-x-lg me-1"></i> Xóa lọc</a>
                         <?php endif; ?>
                     </div>
 
@@ -416,8 +416,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 onchange="updateDistricts('filter_city', 'filter_district'); this.form.submit()">
                                 <option value="">Tất cả TP</option>
                                 <?php foreach (array_keys($locations) as $city): ?>
-                                <option value="<?= $city ?>" <?= ($filterCity == $city) ? 'selected' : '' ?>>
-                                    <?= $city ?></option>
+                                    <option value="<?= $city ?>" <?= ($filterCity == $city) ? 'selected' : '' ?>>
+                                        <?= $city ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -437,9 +437,9 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 onchange="this.form.submit()" style="min-width: 100px;">
                                 <option value="">Tất cả Danh mục</option>
                                 <?php foreach ($cats as $cat): ?>
-                                <option value="<?= $cat['id'] ?>"
-                                    <?= ($filterCategory == $cat['id']) ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($cat['name']) ?></option>
+                                    <option value="<?= $cat['id'] ?>"
+                                        <?= ($filterCategory == $cat['id']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($cat['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -449,7 +449,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 <div class="row g-4">
                     <?php foreach ($places as $place): ?>
-                    <?php
+                        <?php
                         $clickLink = !empty($place['original_link']) ? $place['original_link'] : "#";
                         if ($clickLink === "#" && $place['latitude']) {
                             $clickLink = "http://maps.google.com/?q=" . $place['latitude'] . "," . $place['longitude'];
@@ -462,112 +462,112 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         }
                         $hasImages = count($imageArray) > 0;
                         ?>
-                    <div class="col-md-6 col-xl-6">
-                        <div class="card place-card h-100">
+                        <div class="col-md-6 col-xl-6">
+                            <div class="card place-card h-100">
 
-                            <?php if ($hasImages): $thumbnail = $imageArray[0]; ?>
-                            <div class="thumbnail-wrapper position-relative"
-                                style="height: 200px; width: 100%; overflow: hidden; border-bottom: 1px solid #eee; background: #000;">
-                                <a href="<?= htmlspecialchars($thumbnail) ?>"
-                                    data-fancybox="gallery-<?= $place['id'] ?>"
-                                    data-caption="<?= htmlspecialchars($place['name']) ?>" class="d-block h-100">
-                                    <img src="<?= htmlspecialchars($thumbnail) ?>" class="place-thumbnail"
-                                        style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;"
-                                        alt="<?= htmlspecialchars($place['name']) ?>">
+                                <?php if ($hasImages): $thumbnail = $imageArray[0]; ?>
+                                    <div class="thumbnail-wrapper position-relative"
+                                        style="height: 200px; width: 100%; overflow: hidden; border-bottom: 1px solid #eee; background: #000;">
+                                        <a href="<?= htmlspecialchars($thumbnail) ?>"
+                                            data-fancybox="gallery-<?= $place['id'] ?>"
+                                            data-caption="<?= htmlspecialchars($place['name']) ?>" class="d-block h-100">
+                                            <img src="<?= htmlspecialchars($thumbnail) ?>" class="place-thumbnail"
+                                                style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;"
+                                                alt="<?= htmlspecialchars($place['name']) ?>">
 
-                                    <?php if (count($imageArray) > 1): ?>
-                                    <div
-                                        class="position-absolute bottom-0 end-0 m-2 badge bg-dark bg-opacity-75 fs-6 p-2 shadow-sm border border-secondary">
-                                        <i class="bi bi-images me-1"></i> +<?= count($imageArray) - 1 ?>
+                                            <?php if (count($imageArray) > 1): ?>
+                                                <div
+                                                    class="position-absolute bottom-0 end-0 m-2 badge bg-dark bg-opacity-75 fs-6 p-2 shadow-sm border border-secondary">
+                                                    <i class="bi bi-images me-1"></i> +<?= count($imageArray) - 1 ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </a>
+
+                                        <?php for ($i = 1; $i < count($imageArray); $i++): ?>
+                                            <a href="<?= htmlspecialchars($imageArray[$i]) ?>"
+                                                data-fancybox="gallery-<?= $place['id'] ?>"
+                                                data-caption="<?= htmlspecialchars($place['name']) ?>" style="display: none;"></a>
+                                        <?php endfor; ?>
                                     </div>
+                                <?php else: ?>
+                                    <div class="bg-light d-flex align-items-center justify-content-center"
+                                        style="height: 200px; width: 100%; border-bottom: 1px solid #eee;">
+                                        <div class="text-center text-muted opacity-50">
+                                            <i class="bi bi-image fs-1 d-block mb-2"></i>
+                                            <small>Chưa có ảnh</small>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="place-card-body d-flex flex-column h-100">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div>
+                                            <span
+                                                class="badge bg-info mb-2"><?= htmlspecialchars($place['category_name'] ?? 'Khác') ?></span>
+                                            <span
+                                                class="badge bg-light text-dark border ms-1"><?= htmlspecialchars(($place['city'] == 'Hồ Chí Minh' ? 'HCM' : $place['city']) . ' - ' . $place['district']) ?></span>
+                                        </div>
+                                        <div class="d-flex flex-column align-items-end">
+                                            <div class="text-warning small mb-1">
+                                                <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?>
+                                            </div>
+                                            <?php if ($isAdmin): ?>
+                                                <div class="d-flex gap-1 mt-1">
+                                                    <button class="btn btn-sm btn-light border text-primary px-2 py-0"
+                                                        data-bs-toggle="modal" data-bs-target="#editModal"
+                                                        onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)"
+                                                        title="Sửa"><i class="bi bi-pencil-fill"></i></button>
+                                                    <a href="index.php?action=delete&id=<?= $place['id'] ?>"
+                                                        class="btn btn-sm btn-light border text-danger px-2 py-0"
+                                                        onclick="return confirm('Bạn chắc chắn muốn xóa?');" title="Xóa"><i
+                                                            class="bi bi-trash-fill"></i></a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+
+                                    <h5 class="place-title fw-bold text-truncate"
+                                        title="<?= htmlspecialchars($place['name']) ?>">
+                                        <?= htmlspecialchars($place['name']) ?></h5>
+                                    <p class="place-address mb-2 text-truncate"
+                                        title="<?= htmlspecialchars($place['address']) ?>"><i
+                                            class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i> <span
+                                            class="text-truncate"><?= htmlspecialchars($place['address'] ?: 'Chưa cập nhật địa chỉ') ?></span>
+                                    </p>
+
+                                    <?php if (!empty($place['description'])): ?>
+                                        <div class="place-note"><i
+                                                class="bi bi-quote me-1 opacity-50"></i><?= htmlspecialchars($place['description']) ?>
+                                        </div>
                                     <?php endif; ?>
-                                </a>
 
-                                <?php for ($i = 1; $i < count($imageArray); $i++): ?>
-                                <a href="<?= htmlspecialchars($imageArray[$i]) ?>"
-                                    data-fancybox="gallery-<?= $place['id'] ?>"
-                                    data-caption="<?= htmlspecialchars($place['name']) ?>" style="display: none;"></a>
-                                <?php endfor; ?>
-                            </div>
-                            <?php else: ?>
-                            <div class="bg-light d-flex align-items-center justify-content-center"
-                                style="height: 200px; width: 100%; border-bottom: 1px solid #eee;">
-                                <div class="text-center text-muted opacity-50">
-                                    <i class="bi bi-image fs-1 d-block mb-2"></i>
-                                    <small>Chưa có ảnh</small>
-                                </div>
-                            </div>
-                            <?php endif; ?>
+                                    <div class="mt-auto pt-3 d-flex gap-2">
+                                        <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
+                                            class="btn btn-outline-danger w-100 fw-bold">
+                                            <i class="bi bi-map-fill"></i> Map
+                                        </a>
 
-                            <div class="place-card-body d-flex flex-column h-100">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <span
-                                            class="badge bg-info mb-2"><?= htmlspecialchars($place['category_name'] ?? 'Khác') ?></span>
-                                        <span
-                                            class="badge bg-light text-dark border ms-1"><?= htmlspecialchars(($place['city'] == 'Hồ Chí Minh' ? 'HCM' : $place['city']) . ' - ' . $place['district']) ?></span>
-                                    </div>
-                                    <div class="d-flex flex-column align-items-end">
-                                        <div class="text-warning small mb-1">
-                                            <?= str_repeat('<i class="bi bi-star-fill"></i>', $place['rating']) ?>
-                                        </div>
-                                        <?php if ($isAdmin): ?>
-                                        <div class="d-flex gap-1 mt-1">
-                                            <button class="btn btn-sm btn-light border text-primary px-2 py-0"
-                                                data-bs-toggle="modal" data-bs-target="#editModal"
-                                                onclick="fillEditModal(<?= htmlspecialchars(json_encode($place)) ?>)"
-                                                title="Sửa"><i class="bi bi-pencil-fill"></i></button>
-                                            <a href="index.php?action=delete&id=<?= $place['id'] ?>"
-                                                class="btn btn-sm btn-light border text-danger px-2 py-0"
-                                                onclick="return confirm('Bạn chắc chắn muốn xóa?');" title="Xóa"><i
-                                                    class="bi bi-trash-fill"></i></a>
-                                        </div>
+                                        <?php if ($hasImages): ?>
+                                            <button class="btn btn-outline-success w-100 fw-bold"
+                                                onclick="document.querySelector('[data-fancybox=\'gallery-<?= $place['id'] ?>\']').click();">
+                                                <i class="bi bi-zoom-in"></i> Zoom Ảnh
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="btn btn-outline-secondary w-100 fw-bold opacity-50" disabled>
+                                                <i class="bi bi-image"></i> 0 ảnh
+                                            </button>
                                         <?php endif; ?>
                                     </div>
                                 </div>
-
-                                <h5 class="place-title fw-bold text-truncate"
-                                    title="<?= htmlspecialchars($place['name']) ?>">
-                                    <?= htmlspecialchars($place['name']) ?></h5>
-                                <p class="place-address mb-2 text-truncate"
-                                    title="<?= htmlspecialchars($place['address']) ?>"><i
-                                        class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i> <span
-                                        class="text-truncate"><?= htmlspecialchars($place['address'] ?: 'Chưa cập nhật địa chỉ') ?></span>
-                                </p>
-
-                                <?php if (!empty($place['description'])): ?>
-                                <div class="place-note"><i
-                                        class="bi bi-quote me-1 opacity-50"></i><?= htmlspecialchars($place['description']) ?>
-                                </div>
-                                <?php endif; ?>
-
-                                <div class="mt-auto pt-3 d-flex gap-2">
-                                    <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
-                                        class="btn btn-outline-danger w-100 fw-bold">
-                                        <i class="bi bi-map-fill"></i> Map
-                                    </a>
-
-                                    <?php if ($hasImages): ?>
-                                    <button class="btn btn-outline-success w-100 fw-bold"
-                                        onclick="document.querySelector('[data-fancybox=\'gallery-<?= $place['id'] ?>\']').click();">
-                                        <i class="bi bi-zoom-in"></i> Zoom Ảnh
-                                    </button>
-                                    <?php else: ?>
-                                    <button class="btn btn-outline-secondary w-100 fw-bold opacity-50" disabled>
-                                        <i class="bi bi-image"></i> 0 ảnh
-                                    </button>
-                                    <?php endif; ?>
-                                </div>
                             </div>
                         </div>
-                    </div>
                     <?php endforeach; ?>
 
                     <?php if (empty($places)): ?>
-                    <div class="col-12">
-                        <div class="alert alert-light text-center p-5 shadow-sm rounded-4"><i
-                                class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>Chưa có địa điểm nào phù hợp.</div>
-                    </div>
+                        <div class="col-12">
+                            <div class="alert alert-light text-center p-5 shadow-sm rounded-4"><i
+                                    class="bi bi-inbox fs-1 text-muted mb-3 d-block"></i>Chưa có địa điểm nào phù hợp.</div>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -589,19 +589,19 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             class="btn btn-primary text-nowrap px-4">Thêm</button></form>
                     <h6 class="text-dark fw-bold mb-3">Danh sách hiện tại</h6>
                     <div style="max-height: 300px; overflow-y: auto;" class="pe-2"><?php foreach ($cats as $cat): ?>
-                        <div class="d-flex gap-2 align-items-center mb-2 cat-row p-2 border rounded-3 bg-light">
-                            <form method="POST" class="d-flex gap-2 flex-grow-1"><input type="hidden" name="action"
-                                    value="update_category"><input type="hidden" name="cat_id"
-                                    value="<?= $cat['id'] ?>"><input type="text" name="cat_name"
-                                    class="form-control form-control-sm bg-white"
-                                    value="<?= htmlspecialchars($cat['name']) ?>"><button type="submit"
-                                    class="btn btn-sm btn-success px-3"><i class="bi bi-check-lg"></i></button></form>
-                            <form method="POST" onsubmit="return confirm('Xoá danh mục này?');"><input type="hidden"
-                                    name="action" value="delete_category"><input type="hidden" name="cat_id"
-                                    value="<?= $cat['id'] ?>"><button type="submit"
-                                    class="btn btn-sm btn-outline-danger px-3"><i class="bi bi-trash"></i></button>
-                            </form>
-                        </div><?php endforeach; ?>
+                            <div class="d-flex gap-2 align-items-center mb-2 cat-row p-2 border rounded-3 bg-light">
+                                <form method="POST" class="d-flex gap-2 flex-grow-1"><input type="hidden" name="action"
+                                        value="update_category"><input type="hidden" name="cat_id"
+                                        value="<?= $cat['id'] ?>"><input type="text" name="cat_name"
+                                        class="form-control form-control-sm bg-white"
+                                        value="<?= htmlspecialchars($cat['name']) ?>"><button type="submit"
+                                        class="btn btn-sm btn-success px-3"><i class="bi bi-check-lg"></i></button></form>
+                                <form method="POST" onsubmit="return confirm('Xoá danh mục này?');"><input type="hidden"
+                                        name="action" value="delete_category"><input type="hidden" name="cat_id"
+                                        value="<?= $cat['id'] ?>"><button type="submit"
+                                        class="btn btn-sm btn-outline-danger px-3"><i class="bi bi-trash"></i></button>
+                                </form>
+                            </div><?php endforeach; ?>
                     </div>
                 </div>
             </div>
@@ -631,7 +631,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <select name="city_id" class="form-select" required>
                                 <option value="">-- Chọn TP --</option>
                                 <?php foreach ($dbCities as $c): ?>
-                                <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
+                                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -673,69 +673,69 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <div class="form-floating">
                                     <select name="category_id" id="edit_cat" class="form-select">
                                         <?php foreach ($cats as $cat): ?><option value="<?= $cat['id'] ?>">
-                                            <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
+                                                <?= htmlspecialchars($cat['name']) ?></option><?php endforeach; ?>
                                     </select><label>Danh mục</label>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select name="city" id="edit_city" class="form-select"
-                                        onchange="updateDistricts('edit_city', 'edit_district')">
-                                        <?php foreach (array_keys($locations) as $city): ?><option value="<?= $city ?>">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select name="city" id="edit_city" class="form-select"
+                                    onchange="updateDistricts('edit_city', 'edit_district')">
+                                    <?php foreach (array_keys($locations) as $city): ?><option value="<?= $city ?>">
                                             <?= $city ?></option><?php endforeach; ?>
-                                    </select><label>Thành phố</label>
-                                </div>
+                                </select><label>Thành phố</label>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select name="district" id="edit_district" class="form-select">
-                                        <option value="">-- Chọn --</option>
-                                    </select><label>Quận / Huyện</label>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select name="district" id="edit_district" class="form-select">
+                                    <option value="">-- Chọn --</option>
+                                </select><label>Quận / Huyện</label>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select name="rating" id="edit_rating" class="form-select">
-                                        <option value="5">5 - Tuyệt vời</option>
-                                        <option value="4">4 - Ngon</option>
-                                        <option value="3">3 - Ổn</option>
-                                        <option value="2">2 - Tệ</option>
-                                        <option value="1">1 - Rất tệ</option>
-                                    </select><label>Đánh giá</label>
-                                </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select name="rating" id="edit_rating" class="form-select">
+                                    <option value="5">5 - Tuyệt vời</option>
+                                    <option value="4">4 - Ngon</option>
+                                    <option value="3">3 - Ổn</option>
+                                    <option value="2">2 - Tệ</option>
+                                    <option value="1">1 - Rất tệ</option>
+                                </select><label>Đánh giá</label>
                             </div>
-                            <div class="col-12">
-                                <div class="form-floating"><input type="url" name="map_url" id="edit_map_url"
-                                        class="form-control"><label class="text-danger">Link Google Maps (Dán đè lên nếu
-                                        muốn đổi)</label></div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating"><input type="text" name="address" id="edit_address"
-                                        class="form-control"><label>Địa chỉ hiển thị</label></div>
-                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating"><input type="url" name="map_url" id="edit_map_url"
+                                    class="form-control"><label class="text-danger">Link Google Maps (Dán đè lên nếu
+                                    muốn đổi)</label></div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating"><input type="text" name="address" id="edit_address"
+                                    class="form-control"><label>Địa chỉ hiển thị</label></div>
+                        </div>
 
-                            <div class="col-12" id="edit_old_images_container">
-                            </div>
-                            <div class="col-12 bg-light p-3 rounded border">
-                                <label class="form-label fw-bold text-success"><i class="bi bi-upload"></i> Tải thêm ảnh
-                                    mới</label>
-                                <input type="file" name="upload_images[]" class="form-control" multiple
-                                    accept="image/*">
-                            </div>
+                        <div class="col-12" id="edit_old_images_container">
+                        </div>
+                        <div class="col-12 bg-light p-3 rounded border">
+                            <label class="form-label fw-bold text-success"><i class="bi bi-upload"></i> Tải thêm ảnh
+                                mới</label>
+                            <input type="file" name="upload_images[]" class="form-control" multiple accept="image/*">
+                        </div>
 
-                            <div class="col-12">
-                                <div class="form-floating"><textarea name="description" id="edit_desc"
-                                        class="form-control" style="height: 100px"></textarea><label>Ghi chú</label>
-                                </div>
+                        <div class="col-12">
+                            <div class="form-floating"><textarea name="description" id="edit_desc" class="form-control"
+                                    style="height: 100px"></textarea><label>Ghi chú</label>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer bg-light"><button type="button" class="btn btn-light border"
-                            data-bs-dismiss="modal">Hủy</button><button type="submit"
-                            class="btn btn-primary px-4 fw-bold">Cập nhật thay đổi</button></div>
-                </form>
             </div>
+            <div class="modal-footer bg-light"><button type="button" class="btn btn-light border"
+                    data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary px-4 fw-bold">Cập
+                    nhật thay đổi</button></div>
+            </form>
         </div>
+    </div>
     </div>
 
     <div class="modal fade" id="wheelModal" tabindex="-1" aria-hidden="true">
@@ -765,165 +765,165 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 
     <script>
-    // Khởi tạo Fancybox cho chức năng Xem Ảnh cực mượt
-    Fancybox.bind('[data-fancybox]', {
-        Images: {
-            zoom: true
-        },
-        Thumbs: {
-            type: "modern"
+        // Khởi tạo Fancybox cho chức năng Xem Ảnh cực mượt
+        Fancybox.bind('[data-fancybox]', {
+            Images: {
+                zoom: true
+            },
+            Thumbs: {
+                type: "modern"
+            }
+        });
+
+        const locationsData = <?php echo json_encode($locations); ?>;
+        const currentPlaces = <?php echo json_encode($places); ?>;
+
+        function updateDistricts(citySelectId, districtSelectId, selectedDistrict = null) {
+            const citySel = document.getElementById(citySelectId);
+            const distSel = document.getElementById(districtSelectId);
+            const city = citySel.value;
+            distSel.innerHTML = '<option value="">-- Tất cả/Chọn --</option>';
+            if (city && locationsData[city]) {
+                locationsData[city].forEach(function(d) {
+                    const option = document.createElement("option");
+                    option.value = d;
+                    option.text = d;
+                    if (selectedDistrict && d === selectedDistrict) option.selected = true;
+                    distSel.appendChild(option);
+                });
+            }
         }
-    });
 
-    const locationsData = <?php echo json_encode($locations); ?>;
-    const currentPlaces = <?php echo json_encode($places); ?>;
+        function fillEditModal(data) {
+            document.getElementById('edit_id').value = data.id;
+            document.getElementById('edit_name').value = data.name;
+            document.getElementById('edit_address').value = data.address;
+            document.getElementById('edit_desc').value = data.description;
+            document.getElementById('edit_rating').value = data.rating;
+            document.getElementById('edit_cat').value = data.category_id;
+            document.getElementById('edit_lat').value = data.latitude;
+            document.getElementById('edit_lng').value = data.longitude;
+            document.getElementById('edit_map_url').value = data.original_link || '';
+            document.getElementById('edit_city').value = data.city || 'Hồ Chí Minh';
+            updateDistricts('edit_city', 'edit_district', data.district);
 
-    function updateDistricts(citySelectId, districtSelectId, selectedDistrict = null) {
-        const citySel = document.getElementById(citySelectId);
-        const distSel = document.getElementById(districtSelectId);
-        const city = citySel.value;
-        distSel.innerHTML = '<option value="">-- Tất cả/Chọn --</option>';
-        if (city && locationsData[city]) {
-            locationsData[city].forEach(function(d) {
-                const option = document.createElement("option");
-                option.value = d;
-                option.text = d;
-                if (selectedDistrict && d === selectedDistrict) option.selected = true;
-                distSel.appendChild(option);
-            });
-        }
-    }
+            // --- XỬ LÝ HIỂN THỊ ẢNH CŨ TRỰC QUAN ---
+            const imagesStr = data.images || '';
+            const imageList = imagesStr.split('\n').filter(i => i.trim() !== '');
+            const container = document.getElementById('edit_old_images_container');
+            container.innerHTML = '';
 
-    function fillEditModal(data) {
-        document.getElementById('edit_id').value = data.id;
-        document.getElementById('edit_name').value = data.name;
-        document.getElementById('edit_address').value = data.address;
-        document.getElementById('edit_desc').value = data.description;
-        document.getElementById('edit_rating').value = data.rating;
-        document.getElementById('edit_cat').value = data.category_id;
-        document.getElementById('edit_lat').value = data.latitude;
-        document.getElementById('edit_lng').value = data.longitude;
-        document.getElementById('edit_map_url').value = data.original_link || '';
-        document.getElementById('edit_city').value = data.city || 'Hồ Chí Minh';
-        updateDistricts('edit_city', 'edit_district', data.district);
-
-        // --- XỬ LÝ HIỂN THỊ ẢNH CŨ TRỰC QUAN ---
-        const imagesStr = data.images || '';
-        const imageList = imagesStr.split('\n').filter(i => i.trim() !== '');
-        const container = document.getElementById('edit_old_images_container');
-        container.innerHTML = '';
-
-        if (imageList.length > 0) {
-            let html =
-                '<label class="form-label fw-bold text-secondary">Ảnh đang có (Bỏ tick để xóa):</label><div class="d-flex flex-wrap gap-2 mb-2">';
-            imageList.forEach(img => {
-                html += `
+            if (imageList.length > 0) {
+                let html =
+                    '<label class="form-label fw-bold text-secondary">Ảnh đang có (Bỏ tick để xóa):</label><div class="d-flex flex-wrap gap-2 mb-2">';
+                imageList.forEach(img => {
+                    html += `
                 <div class="position-relative border rounded p-1 bg-white text-center shadow-sm" style="width: 80px;">
                     <img src="${img}" style="width: 100%; height: 60px; object-fit: cover; border-radius: 4px;">
                     <div class="form-check mt-1 d-inline-block">
                         <input class="form-check-input float-none" type="checkbox" name="keep_images[]" value="${img}" checked title="Giữ lại ảnh này">
                     </div>
                 </div>`;
-            });
-            html += '</div>';
-            container.innerHTML = html;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
         }
-    }
 
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById('add_city') && (document.getElementById('add_city').value = 'Hồ Chí Minh',
-            updateDistricts('add_city', 'add_district'));
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('filter_city')) {
-            updateDistricts('filter_city', 'filter_district', urlParams.get('filter_district'));
-        }
-    });
-
-    // --- LOGIC VÒNG QUAY ---
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const spinBtn = document.getElementById('spinBtn');
-    const resultName = document.getElementById('result-name');
-    const resultAddress = document.getElementById('result-address');
-
-    let startAngle = 0;
-    let spinTimeout = null;
-    let spinAngleStart = 10;
-    let spinTime = 0;
-    let spinTimeTotal = 0;
-
-    function drawWheel() {
-        if (!currentPlaces.length) return;
-        const centerX = 150,
-            centerY = 150,
-            radius = 140;
-        const arc = Math.PI / (currentPlaces.length / 2);
-
-        ctx.clearRect(0, 0, 300, 300);
-        currentPlaces.forEach((place, i) => {
-            const angle = startAngle + i * arc;
-            ctx.fillStyle = i % 2 === 0 ? '#FF7F50' : '#20c997';
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, angle, angle + arc, false);
-            ctx.lineTo(centerX, centerY);
-            ctx.fill();
-
-            ctx.save();
-            ctx.fillStyle = "white";
-            ctx.translate(centerX + Math.cos(angle + arc / 2) * radius * 0.6, centerY + Math.sin(angle + arc /
-                2) * radius * 0.6);
-            ctx.rotate(angle + arc / 2 + Math.PI / 2);
-            const text = place.name.substring(0, 15);
-            ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
-            ctx.restore();
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('add_city') && (document.getElementById('add_city').value = 'Hồ Chí Minh',
+                updateDistricts('add_city', 'add_district'));
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('filter_city')) {
+                updateDistricts('filter_city', 'filter_district', urlParams.get('filter_district'));
+            }
         });
-    }
 
-    function rotateWheel() {
-        spinTime += 30;
-        if (spinTime >= spinTimeTotal) {
-            stopRotateWheel();
-            return;
+        // --- LOGIC VÒNG QUAY ---
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultName = document.getElementById('result-name');
+        const resultAddress = document.getElementById('result-address');
+
+        let startAngle = 0;
+        let spinTimeout = null;
+        let spinAngleStart = 10;
+        let spinTime = 0;
+        let spinTimeTotal = 0;
+
+        function drawWheel() {
+            if (!currentPlaces.length) return;
+            const centerX = 150,
+                centerY = 150,
+                radius = 140;
+            const arc = Math.PI / (currentPlaces.length / 2);
+
+            ctx.clearRect(0, 0, 300, 300);
+            currentPlaces.forEach((place, i) => {
+                const angle = startAngle + i * arc;
+                ctx.fillStyle = i % 2 === 0 ? '#FF7F50' : '#20c997';
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, angle, angle + arc, false);
+                ctx.lineTo(centerX, centerY);
+                ctx.fill();
+
+                ctx.save();
+                ctx.fillStyle = "white";
+                ctx.translate(centerX + Math.cos(angle + arc / 2) * radius * 0.6, centerY + Math.sin(angle + arc /
+                    2) * radius * 0.6);
+                ctx.rotate(angle + arc / 2 + Math.PI / 2);
+                const text = place.name.substring(0, 15);
+                ctx.fillText(text, -ctx.measureText(text).width / 2, 0);
+                ctx.restore();
+            });
         }
-        const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
-        startAngle += (spinAngle * Math.PI / 180);
-        drawWheel();
-        spinTimeout = setTimeout(rotateWheel, 30);
-    }
 
-    function stopRotateWheel() {
-        clearTimeout(spinTimeout);
-        const arc = Math.PI / (currentPlaces.length / 2);
-        const degrees = startAngle * 180 / Math.PI + 90;
-        const arcd = arc * 180 / Math.PI;
-        const index = Math.floor((360 - degrees % 360) / arcd) % currentPlaces.length;
+        function rotateWheel() {
+            spinTime += 30;
+            if (spinTime >= spinTimeTotal) {
+                stopRotateWheel();
+                return;
+            }
+            const spinAngle = spinAngleStart - easeOut(spinTime, 0, spinAngleStart, spinTimeTotal);
+            startAngle += (spinAngle * Math.PI / 180);
+            drawWheel();
+            spinTimeout = setTimeout(rotateWheel, 30);
+        }
 
-        const winner = currentPlaces[index];
-        resultName.innerText = "⭐ " + winner.name;
-        resultAddress.innerText = winner.address;
-        spinBtn.disabled = false;
-        spinBtn.innerText = "QUAY LẠI";
-    }
+        function stopRotateWheel() {
+            clearTimeout(spinTimeout);
+            const arc = Math.PI / (currentPlaces.length / 2);
+            const degrees = startAngle * 180 / Math.PI + 90;
+            const arcd = arc * 180 / Math.PI;
+            const index = Math.floor((360 - degrees % 360) / arcd) % currentPlaces.length;
 
-    function easeOut(t, b, c, d) {
-        const ts = (t /= d) * t;
-        const tc = ts * t;
-        return b + c * (tc + -3 * ts + 3 * t);
-    }
+            const winner = currentPlaces[index];
+            resultName.innerText = "⭐ " + winner.name;
+            resultAddress.innerText = winner.address;
+            spinBtn.disabled = false;
+            spinBtn.innerText = "QUAY LẠI";
+        }
 
-    spinBtn.addEventListener('click', () => {
-        resultName.innerText = "Đang quay...";
-        resultAddress.innerText = "";
-        spinBtn.disabled = true;
-        spinAngleStart = Math.random() * 10 + 10;
-        spinTime = 0;
-        spinTimeTotal = Math.random() * 3 + 4 * 1000;
-        rotateWheel();
-    });
+        function easeOut(t, b, c, d) {
+            const ts = (t /= d) * t;
+            const tc = ts * t;
+            return b + c * (tc + -3 * ts + 3 * t);
+        }
 
-    document.getElementById('wheelModal').addEventListener('shown.bs.modal', function() {
-        drawWheel();
-    });
+        spinBtn.addEventListener('click', () => {
+            resultName.innerText = "Đang quay...";
+            resultAddress.innerText = "";
+            spinBtn.disabled = true;
+            spinAngleStart = Math.random() * 10 + 10;
+            spinTime = 0;
+            spinTimeTotal = Math.random() * 3 + 4 * 1000;
+            rotateWheel();
+        });
+
+        document.getElementById('wheelModal').addEventListener('shown.bs.modal', function() {
+            drawWheel();
+        });
     </script>
 </body>
 
