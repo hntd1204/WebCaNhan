@@ -43,11 +43,73 @@ function getCoordinatesFromUrl($url)
 }
 
 // Hàm xử lý upload nhiều ảnh
+// Hàm xử lý thu nhỏ và chuyển đổi ảnh sang WebP
+function compressAndConvertToWebP($sourcePath, $destinationPath, $ext, $maxWidth = 800)
+{
+    // 1. Đọc ảnh vào bộ nhớ tùy theo định dạng
+    switch ($ext) {
+        case 'jpeg':
+        case 'jpg':
+            $image = imagecreatefromjpeg($sourcePath);
+            break;
+        case 'png':
+            $image = imagecreatefrompng($sourcePath);
+            break;
+        case 'gif':
+            $image = imagecreatefromgif($sourcePath);
+            break;
+        case 'webp':
+            $image = imagecreatefromwebp($sourcePath);
+            break;
+        default:
+            return false;
+    }
+
+    if (!$image) return false;
+
+    // 2. Lấy kích thước gốc
+    $origWidth = imagesx($image);
+    $origHeight = imagesy($image);
+
+    // 3. Nếu ảnh to hơn maxWidth (800px), tiến hành thu nhỏ (Resize)
+    if ($origWidth > $maxWidth) {
+        $newWidth = $maxWidth;
+        $newHeight = intval($origHeight * ($maxWidth / $origWidth));
+        $newImage = imagecreatetruecolor($newWidth, $newHeight);
+
+        // Xử lý giữ nền trong suốt nếu ảnh gốc là PNG/GIF
+        if ($ext == 'png' || $ext == 'gif') {
+            imagealphablending($newImage, false);
+            imagesavealpha($newImage, true);
+            $transparent = imagecolorallocatealpha($newImage, 255, 255, 255, 127);
+            imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
+        }
+
+        imagecopyresampled($newImage, $image, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+        imagedestroy($image);
+        $image = $newImage; // Gán lại ảnh đã resize
+    } else {
+        // Vẫn xử lý alpha cho ảnh nhỏ
+        if ($ext == 'png' || $ext == 'gif') {
+            imagepalettetotruecolor($image);
+            imagealphablending($image, true);
+            imagesavealpha($image, true);
+        }
+    }
+
+    // 4. Lưu ảnh mới ra file với định dạng WebP, chất lượng 80%
+    $result = imagewebp($image, $destinationPath, 80);
+    imagedestroy($image);
+
+    return $result;
+}
+
+// Hàm upload nhiều ảnh (Đã được nâng cấp)
 function handleMultipleUploads($fileArray)
 {
     $uploadedPaths = [];
     $uploadDir = 'uploads/';
-    // Tự động tạo thư mục nếu chưa có
+
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
@@ -59,13 +121,13 @@ function handleMultipleUploads($fileArray)
                 $tmpName = $fileArray['tmp_name'][$i];
                 $ext = strtolower(pathinfo($fileArray['name'][$i], PATHINFO_EXTENSION));
 
-                // Kiểm tra định dạng ảnh hợp lệ
                 if (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                    // Đổi tên file ngẫu nhiên để không bị trùng
-                    $fileName = uniqid() . '_' . time() . '.' . $ext;
+                    // CỐ ĐỊNH LƯU THÀNH ĐUÔI .webp
+                    $fileName = uniqid() . '_' . time() . '.webp';
                     $targetFilePath = $uploadDir . $fileName;
 
-                    if (move_uploaded_file($tmpName, $targetFilePath)) {
+                    // Chuyển việc lưu file qua hàm xử lý bên trên
+                    if (compressAndConvertToWebP($tmpName, $targetFilePath, $ext)) {
                         $uploadedPaths[] = $targetFilePath;
                     }
                 }
@@ -113,13 +175,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Thêm Địa điểm
     if (isset($_POST['action']) && $_POST['action'] == 'add_place') {
         $lat = null;
         $lng = null;
         $originalLink = $_POST['map_url'] ?? '';
 
-        // Gọi hàm upload ảnh
         $uploadedImages = handleMultipleUploads($_FILES['upload_images'] ?? []);
         $imagesStr = implode("\n", $uploadedImages);
 
@@ -139,19 +199,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    // Sửa Địa điểm
     if (isset($_POST['action']) && $_POST['action'] == 'edit_place') {
         $lat = !empty($_POST['current_lat']) ? $_POST['current_lat'] : null;
         $lng = !empty($_POST['current_lng']) ? $_POST['current_lng'] : null;
         $originalLink = $_POST['map_url'] ?? '';
 
-        // MẢNG CHỨA CÁC ẢNH CŨ ĐƯỢC GIỮ LẠI (TỪ CHECKBOX)
         $keepImages = $_POST['keep_images'] ?? [];
-
-        // UPLOAD ẢNH MỚI
         $newUploadedImages = handleMultipleUploads($_FILES['upload_images'] ?? []);
-
-        // GỘP ẢNH CŨ VÀ MỚI
         $allImagesArr = array_merge($keepImages, $newUploadedImages);
         $finalImagesStr = implode("\n", $allImagesArr);
 
@@ -180,16 +234,30 @@ if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id']))
     exit;
 }
 
-// --- LẤY DỮ LIỆU ---
+// --- LẤY DỮ LIỆU & XỬ LÝ LỌC / TÌM QUANH ĐÂY ---
 $cats = $pdo->query("SELECT * FROM categories ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-// Query Lọc
-$sqlPlace = "SELECT places.*, categories.name as category_name FROM places LEFT JOIN categories ON places.category_id = categories.id WHERE 1=1";
+$userLat = $_GET['user_lat'] ?? null;
+$userLng = $_GET['user_lng'] ?? null;
+$sortDistance = isset($_GET['sort']) && $_GET['sort'] === 'distance';
+
 $params = [];
 $filterCity = $_GET['filter_city'] ?? '';
 $filterDistrict = $_GET['filter_district'] ?? '';
 $filterCategory = $_GET['filter_category'] ?? '';
 $search = $_GET['search'] ?? '';
+
+// Nếu có tọa độ thì thêm công thức tính khoảng cách
+if ($userLat && $userLng && $sortDistance) {
+    $sqlPlace = "SELECT places.*, categories.name as category_name, 
+        (6371 * acos(cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))) AS distance 
+        FROM places 
+        LEFT JOIN categories ON places.category_id = categories.id 
+        WHERE latitude IS NOT NULL AND longitude IS NOT NULL";
+    $params = [$userLat, $userLng, $userLat];
+} else {
+    $sqlPlace = "SELECT places.*, categories.name as category_name FROM places LEFT JOIN categories ON places.category_id = categories.id WHERE 1=1";
+}
 
 if (!empty($filterCity)) {
     $sqlPlace .= " AND places.city = ?";
@@ -209,7 +277,13 @@ if (!empty($search)) {
     $params[] = "%$search%";
 }
 
-$sqlPlace .= " ORDER BY RAND()";
+// Sắp xếp theo khoảng cách hoặc Random
+if ($userLat && $userLng && $sortDistance) {
+    $sqlPlace .= " ORDER BY distance ASC";
+} else {
+    $sqlPlace .= " ORDER BY RAND()";
+}
+
 $stmt = $pdo->prepare($sqlPlace);
 $stmt->execute($params);
 $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -222,6 +296,11 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Thành Đạt</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 
@@ -229,7 +308,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* CSS cho hiệu ứng hover ảnh mượt mà ở trang chủ */
         .thumbnail-wrapper {
             cursor: pointer;
         }
@@ -309,15 +387,11 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                             value="<?= $city ?>"><?= $city ?></option><?php endforeach; ?>
                                                 </select>
                                                 <label>Thành phố</label>
-
                                                 <div class="position-absolute top-50 end-0 translate-middle-y me-2">
                                                     <button class="btn btn-sm btn-light border" type="button"
                                                         data-bs-toggle="modal" data-bs-target="#locModal"
-                                                        title="Thêm khu vực">
-                                                        <i class="bi bi-gear"></i>
-                                                    </button>
+                                                        title="Thêm khu vực"><i class="bi bi-gear"></i></button>
                                                 </div>
-
                                             </div>
                                         </div>
                                         <div class="col-12 col-md-6">
@@ -371,9 +445,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 <?php else: ?>
                     <div class="alert alert-info shadow-sm sticky-top mt-3" style="top: 90px;">
-                        <h5 class="fw-bold mb-2">
-                            <i class="bi bi-info-circle-fill me-2"></i>Thông báo
-                        </h5>
+                        <h5 class="fw-bold mb-2"><i class="bi bi-info-circle-fill me-2"></i>Thông báo</h5>
                         <p class="mb-2">Bạn đang ở chế độ <b>Xem</b>. Vui lòng <a href="login.php"
                                 class="fw-bold text-primary">Đăng nhập Admin</a> để thêm hoặc chỉnh sửa địa điểm.</p>
                         <hr class="my-2">
@@ -395,7 +467,12 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </button>
                         <?php endif; ?>
 
-                        <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory) || !empty($search)): ?>
+                        <button class="btn btn-success btn-sm fw-bold shadow-sm rounded-pill px-3 py-2 text-white"
+                            onclick="getNearbyPlaces(this)">
+                            <i class="bi bi-geo-fill me-1"></i> Gần tôi
+                        </button>
+
+                        <?php if (!empty($filterCity) || !empty($filterDistrict) || !empty($filterCategory) || !empty($search) || $sortDistance): ?>
                             <a href="index.php" class="badge bg-danger text-decoration-none rounded-pill px-3 py-2"><i
                                     class="bi bi-x-lg me-1"></i> Xóa lọc</a>
                         <?php endif; ?>
@@ -455,7 +532,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             $clickLink = "http://maps.google.com/?q=" . $place['latitude'] . "," . $place['longitude'];
                         }
 
-                        // Lọc mảng hình ảnh
                         $imageArray = [];
                         if (!empty($place['images'])) {
                             $imageArray = array_filter(array_map('trim', explode("\n", str_replace("\r", "", $place['images']))));
@@ -463,7 +539,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         $hasImages = count($imageArray) > 0;
                         ?>
                         <div class="col-md-6 col-xl-6">
-                            <div class="card place-card h-100">
+                            <div class="card place-card h-100" data-lat="<?= $place['latitude'] ?>"
+                                data-lng="<?= $place['longitude'] ?>">
 
                                 <?php if ($hasImages): $thumbnail = $imageArray[0]; ?>
                                     <div class="thumbnail-wrapper position-relative"
@@ -473,8 +550,8 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             data-caption="<?= htmlspecialchars($place['name']) ?>" class="d-block h-100">
                                             <img src="<?= htmlspecialchars($thumbnail) ?>" class="place-thumbnail"
                                                 style="width: 100%; height: 100%; object-fit: cover; opacity: 0.9;"
-                                                alt="<?= htmlspecialchars($place['name']) ?>">
-
+                                                alt="<?= htmlspecialchars($place['name']) ?>" loading="lazy" width="400"
+                                                height="200">
                                             <?php if (count($imageArray) > 1): ?>
                                                 <div
                                                     class="position-absolute bottom-0 end-0 m-2 badge bg-dark bg-opacity-75 fs-6 p-2 shadow-sm border border-secondary">
@@ -482,7 +559,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 </div>
                                             <?php endif; ?>
                                         </a>
-
                                         <?php for ($i = 1; $i < count($imageArray); $i++): ?>
                                             <a href="<?= htmlspecialchars($imageArray[$i]) ?>"
                                                 data-fancybox="gallery-<?= $place['id'] ?>"
@@ -529,6 +605,16 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     <h5 class="place-title fw-bold text-truncate"
                                         title="<?= htmlspecialchars($place['name']) ?>">
                                         <?= htmlspecialchars($place['name']) ?></h5>
+
+                                    <?php if (isset($place['distance'])): ?>
+                                        <div class="mb-2">
+                                            <span class="badge bg-secondary shadow-sm p-2 distance-badge loading">
+                                                <span class="spinner-border spinner-border-sm" role="status"
+                                                    aria-hidden="true"></span> Đang tính đường đi...
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+
                                     <p class="place-address mb-2 text-truncate"
                                         title="<?= htmlspecialchars($place['address']) ?>"><i
                                             class="bi bi-geo-alt-fill text-danger mt-1 flex-shrink-0"></i> <span
@@ -543,19 +629,15 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                                     <div class="mt-auto pt-3 d-flex gap-2">
                                         <a href="<?= htmlspecialchars($clickLink) ?>" target="_blank"
-                                            class="btn btn-outline-danger w-100 fw-bold">
-                                            <i class="bi bi-map-fill"></i> Map
-                                        </a>
-
+                                            class="btn btn-outline-danger w-100 fw-bold"><i class="bi bi-map-fill"></i>
+                                            Map</a>
                                         <?php if ($hasImages): ?>
                                             <button class="btn btn-outline-success w-100 fw-bold"
-                                                onclick="document.querySelector('[data-fancybox=\'gallery-<?= $place['id'] ?>\']').click();">
-                                                <i class="bi bi-zoom-in"></i> Zoom Ảnh
-                                            </button>
+                                                onclick="document.querySelector('[data-fancybox=\'gallery-<?= $place['id'] ?>\']').click();"><i
+                                                    class="bi bi-zoom-in"></i> Zoom</button>
                                         <?php else: ?>
-                                            <button class="btn btn-outline-secondary w-100 fw-bold opacity-50" disabled>
-                                                <i class="bi bi-image"></i> 0 ảnh
-                                            </button>
+                                            <button class="btn btn-outline-secondary w-100 fw-bold opacity-50" disabled><i
+                                                    class="bi bi-image"></i> 0 ảnh</button>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -623,16 +705,14 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             placeholder="Nhập tên TP (VD: Đà Lạt)...">
                         <button type="submit" class="btn btn-success text-nowrap px-3 fw-bold">Thêm</button>
                     </form>
-
                     <h6 class="text-dark fw-bold mb-2">2. Thêm Quận/Huyện vào Thành phố</h6>
                     <form method="POST" class="row g-2 align-items-center">
                         <input type="hidden" name="action" value="add_district">
                         <div class="col-5">
                             <select name="city_id" class="form-select" required>
                                 <option value="">-- Chọn TP --</option>
-                                <?php foreach ($dbCities as $c): ?>
-                                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-                                <?php endforeach; ?>
+                                <?php foreach ($dbCities as $c): ?><option value="<?= $c['id'] ?>">
+                                        <?= htmlspecialchars($c['name']) ?></option><?php endforeach; ?>
                             </select>
                         </div>
                         <div class="col-5">
@@ -715,8 +795,7 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                     class="form-control"><label>Địa chỉ hiển thị</label></div>
                         </div>
 
-                        <div class="col-12" id="edit_old_images_container">
-                        </div>
+                        <div class="col-12" id="edit_old_images_container"></div>
                         <div class="col-12 bg-light p-3 rounded border">
                             <label class="form-label fw-bold text-success"><i class="bi bi-upload"></i> Tải thêm ảnh
                                 mới</label>
@@ -725,17 +804,15 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                         <div class="col-12">
                             <div class="form-floating"><textarea name="description" id="edit_desc" class="form-control"
-                                    style="height: 100px"></textarea><label>Ghi chú</label>
-                            </div>
+                                    style="height: 100px"></textarea><label>Ghi chú</label></div>
                         </div>
                     </div>
+                    <div class="modal-footer bg-light"><button type="button" class="btn btn-light border"
+                            data-bs-dismiss="modal">Hủy</button><button type="submit"
+                            class="btn btn-primary px-4 fw-bold">Cập nhật thay đổi</button></div>
+                </form>
             </div>
-            <div class="modal-footer bg-light"><button type="button" class="btn btn-light border"
-                    data-bs-dismiss="modal">Hủy</button><button type="submit" class="btn btn-primary px-4 fw-bold">Cập
-                    nhật thay đổi</button></div>
-            </form>
         </div>
-    </div>
     </div>
 
     <div class="modal fade" id="wheelModal" tabindex="-1" aria-hidden="true">
@@ -765,7 +842,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
 
     <script>
-        // Khởi tạo Fancybox cho chức năng Xem Ảnh cực mượt
         Fancybox.bind('[data-fancybox]', {
             Images: {
                 zoom: true
@@ -807,7 +883,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
             document.getElementById('edit_city').value = data.city || 'Hồ Chí Minh';
             updateDistricts('edit_city', 'edit_district', data.district);
 
-            // --- XỬ LÝ HIỂN THỊ ẢNH CŨ TRỰC QUAN ---
             const imagesStr = data.images || '';
             const imageList = imagesStr.split('\n').filter(i => i.trim() !== '');
             const container = document.getElementById('edit_old_images_container');
@@ -839,7 +914,6 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
         });
 
-        // --- LOGIC VÒNG QUAY ---
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spinBtn');
@@ -923,6 +997,112 @@ $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         document.getElementById('wheelModal').addEventListener('shown.bs.modal', function() {
             drawWheel();
+        });
+
+        // Cập nhật lại hàm này ở cuối file index.php
+        function getNearbyPlaces(btn) {
+            if (navigator.geolocation) {
+                // Lưu lại giao diện cũ của nút và tạo hiệu ứng loading
+                const originalText = btn.innerHTML;
+                btn.innerHTML =
+                    '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Đang định vị...';
+                btn.disabled = true; // Khóa nút tránh click nhiều lần
+
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        // Lấy thành công
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        window.location.href = `index.php?user_lat=${lat}&user_lng=${lng}&sort=distance`;
+                    },
+                    function(error) {
+                        // Thất bại: Báo lỗi chi tiết
+                        console.warn(`Lỗi định vị (${error.code}): ${error.message}`);
+                        let errorMsg = "Không thể lấy vị trí. ";
+
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMsg += "Bạn đã từ chối cấp quyền định vị cho trang web này.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMsg += "Không có tín hiệu GPS hoặc mạng.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMsg += "Hết thời gian chờ lấy vị trí.";
+                                break;
+                            default:
+                                errorMsg += "Lỗi không xác định.";
+                                break;
+                        }
+                        alert(errorMsg);
+
+                        // Khôi phục lại nút bấm
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }, {
+                        enableHighAccuracy: true, // Ưu tiên độ chính xác cao
+                        timeout: 10000, // Chờ tối đa 10 giây
+                        maximumAge: 0 // Không dùng cache cũ
+                    }
+                );
+            } else {
+                alert("Trình duyệt của bạn không hỗ trợ định vị (Geolocation).");
+            }
+        }
+
+        // --- LẤY TỌA ĐỘ NGƯỜI DÙNG TỪ URL ---
+        const userLat = parseFloat(<?= json_encode($userLat) ?>);
+        const userLng = parseFloat(<?= json_encode($userLng) ?>);
+
+        // Hàm tính khoảng cách đường thẳng (Haversine) - Tốc độ tức thì
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Bán kính trái đất (km)
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return (R * c).toFixed(1); // Làm tròn 1 chữ số thập phân
+        }
+
+        // --- HIỂN THỊ KHOẢNG CÁCH VÀ TẠO LINK CHỈ ĐƯỜNG GOOGLE MAPS ---
+        document.addEventListener("DOMContentLoaded", function() {
+            if (userLat && userLng && !isNaN(userLat) && !isNaN(userLng)) {
+                const cards = document.querySelectorAll('.place-card');
+
+                cards.forEach(card => {
+                    const placeLat = parseFloat(card.getAttribute('data-lat'));
+                    const placeLng = parseFloat(card.getAttribute('data-lng'));
+                    const badge = card.querySelector('.distance-badge');
+
+                    // Nếu có tọa độ hợp lệ
+                    if (!isNaN(placeLat) && !isNaN(placeLng)) {
+                        // 1. Hiển thị khoảng cách tức thì
+                        if (badge) {
+                            const distanceKm = calculateDistance(userLat, userLng, placeLat, placeLng);
+                            badge.className = 'badge bg-success shadow-sm p-2 distance-badge';
+                            badge.innerHTML =
+                                `<i class="bi bi-geo-alt-fill me-1"></i> Cách đây ~${distanceKm} km`;
+                        }
+
+                        // 2. Chuyển đổi nút "Map" thành nút "Chỉ đường" bằng Google Maps
+                        const mapBtn = card.querySelector('a.btn-outline-danger');
+                        if (mapBtn) {
+                            // URL scheme chuẩn của Google Maps Directions
+                            const dirUrl =
+                                `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${placeLat},${placeLng}`;
+                            mapBtn.href = dirUrl;
+                            mapBtn.innerHTML = `<i class="bi bi-signpost-split-fill"></i> Chỉ đường`;
+                            mapBtn.target = "_blank"; // Mở tab mới hoặc mở app Google Maps trên điện thoại
+                        }
+                    } else if (badge) {
+                        // Báo lỗi nếu quán ăn chưa có tọa độ chuẩn
+                        badge.className = 'badge bg-secondary shadow-sm p-2 distance-badge';
+                        badge.innerHTML = `<i class="bi bi-exclamation-circle"></i> Chưa rõ tọa độ`;
+                    }
+                });
+            }
         });
     </script>
 </body>
