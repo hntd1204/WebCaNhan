@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db.php';
+require_once 'app_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
@@ -11,6 +12,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 $stmt = $pdo->prepare("SELECT balance, hilo_count FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch();
+$settings = fetch_settings($pdo);
+$gameConfig = public_game_config($settings, 'hilo');
+$chipOptions = bet_chip_options((int)$gameConfig['min_bet'], (int)$gameConfig['max_bet']);
 
 // Lấy cấu hình nhiệm vụ Hi-Lo từ hệ thống
 try {
@@ -60,6 +64,8 @@ $myHistories = $historyStmt->fetchAll();
 </head>
 
 <body class="bg-indigo-950 text-slate-100 min-h-screen">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <nav
         class="bg-indigo-900/80 backdrop-blur-md px-4 py-3 flex justify-between items-center sticky top-0 z-50 shadow-md border-b border-indigo-800">
         <h1 class="text-xl font-bold text-white uppercase tracking-wider">Lật Bài Hi-Lo</h1>
@@ -82,6 +88,9 @@ $myHistories = $historyStmt->fetchAll();
     </nav>
 
     <main class="max-w-md mx-auto mt-6 px-4 pb-10">
+        <div class="mb-4 rounded-xl border <?= $gameConfig['enabled'] ? 'border-indigo-400/30 bg-indigo-500/10 text-indigo-100' : 'border-red-500/40 bg-red-500/10 text-red-100' ?> p-3 text-xs font-bold">
+            <?= $gameConfig['enabled'] ? 'Cấu hình admin: cược ' . number_format($gameConfig['min_bet']) . 'đ - ' . (($gameConfig['max_bet'] ?? 0) > 0 ? number_format($gameConfig['max_bet']) . 'đ' : 'không giới hạn') . ', hệ số x' . $gameConfig['multiplier'] . '.' : 'Game đang tạm khóa bởi admin.' ?>
+        </div>
         <div class="bg-indigo-800 border-4 border-indigo-600 p-6 rounded-3xl shadow-2xl mb-8 relative">
             <div class="text-center mb-4 flex justify-between items-center bg-indigo-900/50 p-3 rounded-xl">
                 <div class="text-indigo-200 text-sm font-bold">Tiền Thưởng: <br> <span id="currentPot"
@@ -101,14 +110,14 @@ $myHistories = $historyStmt->fetchAll();
                 Sẵn sàng!</div>
 
             <div id="betArea" class="flex justify-center gap-3 overflow-x-auto no-scrollbar mb-4">
-                <?php foreach ([10000, 20000, 50000, 100000] as $chip): ?>
+                <?php foreach ($chipOptions as $chip): ?>
                     <button onclick="selectChip(<?= $chip ?>, this)"
-                        class="chip-btn shrink-0 w-12 h-12 rounded-full border-2 border-slate-600 bg-slate-800 font-bold text-xs <?= $chip == 10000 ? 'border-amber-400 text-amber-400' : '' ?>"><?= $chip / 1000 ?>K</button>
+                        class="chip-btn shrink-0 w-12 h-12 rounded-full border-2 border-slate-600 bg-slate-800 font-bold text-xs <?= $chip == $chipOptions[0] ? 'border-amber-400 text-amber-400' : '' ?>"><?= $chip >= 1000000 ? ($chip / 1000000) . "M" : ($chip / 1000) . "K" ?></button>
                 <?php endforeach; ?>
             </div>
 
             <div class="flex flex-col gap-3">
-                <button id="startBtn" onclick="startGame()"
+                <button id="startBtn" onclick="startGame()" <?= !$gameConfig['enabled'] ? 'disabled' : '' ?>
                     class="w-full bg-amber-500 hover:bg-amber-400 text-indigo-950 text-lg font-black py-4 rounded-xl shadow-lg uppercase transition">Bắt
                     Đầu Cược</button>
 
@@ -152,7 +161,8 @@ $myHistories = $historyStmt->fetchAll();
             lose: new Audio('https://www.soundjay.com/buttons/button-10.mp3')
         };
 
-        let currentBet = 10000;
+        let currentBet = <?= (int)$chipOptions[0] ?>;
+        const gameEnabled = <?= $gameConfig['enabled'] ? 'true' : 'false' ?>;
         let isPlaying = false;
 
         function selectChip(amount, el) {
@@ -172,6 +182,18 @@ $myHistories = $historyStmt->fetchAll();
                 <div class="text-6xl text-center self-center">${card.suit}</div>
                 <div class="text-xl font-bold text-right transform rotate-180">${card.rank}</div>
             </div>`;
+        }
+
+
+        function updateMission(mission) {
+            if (!mission) return;
+            const progressSpan = document.getElementById('missionProgress');
+            if (mission.current !== undefined && progressSpan) {
+                progressSpan.innerText = `${mission.current}/${mission.target ?? mission.current}`;
+            }
+            if (mission.rewarded) {
+                alert("🎁 Chúc mừng! Bạn đã hoàn thành nhiệm vụ Lật Bài và nhận được lượt quay miễn phí!");
+            }
         }
 
         async function startGame() {
@@ -198,17 +220,6 @@ $myHistories = $historyStmt->fetchAll();
                 document.getElementById('cardArea').innerHTML = renderCard(data.card);
                 document.getElementById('resultMsg').innerHTML = "<span class='text-white'>Đoán lá tiếp theo!</span>";
 
-                // Cập nhật tiến độ nhiệm vụ từ server
-                if (data.mission) {
-                    const progressSpan = document.getElementById('missionProgress');
-                    if (data.mission.current !== undefined && progressSpan) {
-                        progressSpan.innerText = `${data.mission.current}/${data.mission.target}`;
-                    }
-                    if (data.mission.rewarded) {
-                        alert("🎁 Chúc mừng! Bạn đã hoàn thành nhiệm vụ Lật Bài và nhận được lượt quay miễn phí!");
-                    }
-                }
-
                 document.getElementById('startBtn').classList.add('hidden');
                 document.getElementById('betArea').classList.add('hidden');
                 document.getElementById('actionBtns').classList.remove('hidden');
@@ -234,7 +245,10 @@ $myHistories = $historyStmt->fetchAll();
                 sounds.card.play();
                 document.getElementById('cardArea').innerHTML = renderCard(data.card);
 
+                if (!data.success) return alert(data.error || 'Lỗi hệ thống');
+
                 if (data.is_end) {
+                    updateMission(data.mission);
                     sounds.lose.play();
                     document.getElementById('currentPot').innerText = "0";
                     document.getElementById('resultMsg').innerHTML =
@@ -265,6 +279,7 @@ $myHistories = $historyStmt->fetchAll();
                 const data = await res.json();
 
                 if (data.success) {
+                    updateMission(data.mission);
                     sounds.win.play();
                     document.getElementById('balance').innerText = data.balance.toLocaleString();
                     document.getElementById('resultMsg').innerHTML =

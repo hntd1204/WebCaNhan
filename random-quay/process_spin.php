@@ -1,7 +1,8 @@
 <?php
 session_start();
 require 'db.php';
-header('Content-Type: application/json');
+require_once 'app_helpers.php';
+header('Content-Type: application/json; charset=utf-8');
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     echo json_encode(['success' => false, 'error' => 'Chưa đăng nhập']);
@@ -29,9 +30,13 @@ try {
     $setStmt = $pdo->query("SELECT min_reward, max_reward FROM settings WHERE id = 1");
     $settings = $setStmt->fetch();
 
+    $minReward = max(0, (int)($settings['min_reward'] ?? 0));
+    $maxReward = max(0, (int)($settings['max_reward'] ?? 0));
+    if ($maxReward < $minReward) { [$minReward, $maxReward] = [$maxReward, $minReward]; }
+
     // 3. Random số tiền thưởng (làm tròn đến hàng nghìn, VD: 15,000)
-    $reward = rand($settings['min_reward'], $settings['max_reward']);
-    $reward = round($reward / 1000) * 1000;
+    $reward = random_int($minReward, $maxReward);
+    $reward = money_round($reward);
 
     $newBalance = $user['balance'] + $reward;
     $spinsLeft = $user['spins_available'] - 1;

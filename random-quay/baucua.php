@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db.php';
+require_once 'app_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
@@ -10,6 +11,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 $stmt = $pdo->prepare("SELECT balance, baucua_count FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch();
+$settings = fetch_settings($pdo);
+$gameConfig = public_game_config($settings, 'baucua');
+$chipOptions = bet_chip_options((int)$gameConfig['min_bet'], (int)$gameConfig['max_bet']);
 
 // Lấy cấu hình nhiệm vụ từ Admin
 $mission = $pdo->query("SELECT target_count, reward_spins FROM mission_settings WHERE id = 1")->fetch();
@@ -73,6 +77,8 @@ $animals = [
 </head>
 
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <nav
         class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
         <h1 class="text-xl font-bold text-amber-400 uppercase tracking-wider">Bầu Cua</h1>
@@ -93,6 +99,9 @@ $animals = [
     </nav>
 
     <main class="max-w-4xl mx-auto mt-6 px-4 pb-32">
+        <div class="mb-4 rounded-xl border <?= $gameConfig['enabled'] ? 'border-amber-500/30 bg-amber-500/10 text-amber-100' : 'border-red-500/40 bg-red-500/10 text-red-100' ?> p-3 text-xs font-bold">
+            <?= $gameConfig['enabled'] ? 'Cấu hình admin: cược ' . number_format($gameConfig['min_bet']) . 'đ - ' . (($gameConfig['max_bet'] ?? 0) > 0 ? number_format($gameConfig['max_bet']) . 'đ' : 'không giới hạn') . ', hệ số x' . $gameConfig['multiplier'] . ', tối đa ' . $gameConfig['baucua_max_doors'] . ' cửa.' : 'Game đang tạm khóa bởi admin.' ?>
+        </div>
         <div class="bg-slate-800 border border-slate-700 p-6 rounded-3xl shadow-2xl text-center mb-6">
             <div class="flex justify-center gap-4 mb-4">
                 <div id="dice-1"
@@ -122,9 +131,9 @@ $animals = [
         </div>
 
         <div class="flex overflow-x-auto gap-3 pb-4 justify-center mb-4">
-            <?php foreach ([5000, 10000, 20000, 50000, 100000] as $val): ?>
+            <?php foreach ($chipOptions as $val): ?>
             <button onclick="selectChip(<?= $val ?>, this)"
-                class="chip-btn shrink-0 w-14 h-14 rounded-full border-4 border-slate-600 bg-slate-800 text-slate-300 font-bold text-xs <?= $val == 10000 ? 'border-amber-400 bg-amber-500/20 text-amber-400' : '' ?>"><?= $val / 1000 ?>K</button>
+                class="chip-btn shrink-0 w-14 h-14 rounded-full border-4 border-slate-600 bg-slate-800 text-slate-300 font-bold text-xs <?= $val == $chipOptions[0] ? 'border-amber-400 bg-amber-500/20 text-amber-400' : '' ?>"><?= $val >= 1000000 ? ($val / 1000000) . "M" : ($val / 1000) . "K" ?></button>
             <?php endforeach; ?>
         </div>
 
@@ -176,7 +185,7 @@ $animals = [
         </div>
 
         <div class="fixed bottom-0 left-0 right-0 p-4 bg-slate-900/95 border-t border-slate-800">
-            <button id="rollBtn"
+            <button id="rollBtn" <?= !$gameConfig['enabled'] ? 'disabled' : '' ?>
                 class="w-full max-w-md mx-auto block bg-gradient-to-r from-amber-500 to-orange-600 text-slate-900 text-lg font-black py-3 rounded-xl shadow-lg uppercase tracking-widest">🎲
                 XÓC NGAY 🎲</button>
         </div>
@@ -198,7 +207,9 @@ $animals = [
         'cua': '🦀',
         'tom': '🦐'
     };
-    let currentChip = 10000;
+    let currentChip = <?= (int)$chipOptions[0] ?>;
+    const gameEnabled = <?= $gameConfig['enabled'] ? 'true' : 'false' ?>;
+    const maxBetDoors = <?= (int)$gameConfig['baucua_max_doors'] ?>;
     let bets = {};
     let isRolling = false;
 
@@ -216,6 +227,7 @@ $animals = [
     // Đặt cược vào ô
     function placeBet(animal) {
         if (isRolling) return;
+        if (!gameEnabled) { alert('Game đang tạm khóa bởi admin.'); return; }
 
         // 1. Lấy số dư hiện tại trực tiếp từ trên màn hình
         let balanceEl = document.getElementById('balance');
@@ -237,6 +249,10 @@ $animals = [
         balanceEl.innerText = (currentBalance - currentChip).toLocaleString('vi-VN');
 
         sounds.click.play();
+        if (!bets[animal] && Object.keys(bets).length >= maxBetDoors) {
+            alert('Admin chỉ cho cược tối đa ' + maxBetDoors + ' cửa.');
+            return;
+        }
         bets[animal] = (bets[animal] || 0) + currentChip;
 
         // Hiển thị số tiền cược vào badge của con vật

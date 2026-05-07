@@ -130,6 +130,8 @@ try {
 </head>
 
 <body class="text-slate-800 antialiased relative overflow-x-hidden pb-20 md:pb-0">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <div
         class="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-blue-600/10 via-purple-600/5 to-transparent -z-10 pointer-events-none hidden md:block">
     </div>
@@ -461,7 +463,7 @@ try {
                             $shopStmt = $pdo->query("SELECT * FROM shop_items WHERE is_active = 1 ORDER BY cost ASC");
                             while ($item = $shopStmt->fetch()): ?>
                                 <button
-                                    onclick="buyAction('buy_gift', <?= $item['id'] ?>, '<?= htmlspecialchars($item['name']) ?>', <?= $item['cost'] ?>)"
+                                    onclick='buyAction("buy_gift", <?= (int)$item["id"] ?>, <?= json_encode($item["name"], JSON_UNESCAPED_UNICODE) ?>, <?= (int)$item["cost"] ?>)'
                                     class="w-full flex justify-between items-center bg-white hover:bg-emerald-50 p-4 rounded-2xl border-2 border-slate-100 hover:border-emerald-200 transition-all active:scale-95 group shadow-sm">
                                     <div class="flex items-center gap-4">
                                         <div

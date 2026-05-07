@@ -42,14 +42,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body class="bg-slate-100 min-h-screen flex items-center justify-center">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
         <h2 class="text-3xl font-bold text-center text-slate-800 mb-8">Tạo Tài Khoản</h2>
 
         <?php if ($error): ?>
-        <div class="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm text-center"><?= $error ?></div>
+        <div class="bg-red-100 text-red-600 p-3 rounded-lg mb-4 text-sm text-center"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         <?php if ($success): ?>
-        <div class="bg-green-100 text-green-600 p-3 rounded-lg mb-4 text-sm text-center"><?= $success ?></div>
+        <div class="bg-green-100 text-green-600 p-3 rounded-lg mb-4 text-sm text-center"><?= htmlspecialchars($success) ?></div>
         <?php endif; ?>
 
         <form method="POST" class="space-y-5">

@@ -19,12 +19,16 @@ $new_columns = [
     "baucua_multiplier FLOAT DEFAULT 1.0",
     "blackjack_multiplier FLOAT DEFAULT 2.0",
     "hilo_multiplier FLOAT DEFAULT 1.2",
-    "baucua_win_rate INT DEFAULT 40",
-    "blackjack_win_rate INT DEFAULT 40",
-    "hilo_win_rate INT DEFAULT 40",
-    "mines_win_rate INT DEFAULT 40",
-    "mines_add_money INT DEFAULT 5000",
-    "mines_bombs INT DEFAULT 3"
+    "mines_multiplier FLOAT DEFAULT 1.2",
+    "mines_bombs INT DEFAULT 3",
+    "minigame_min_bet INT DEFAULT 1000",
+    "minigame_max_bet INT DEFAULT 1000000",
+    "baucua_max_doors INT DEFAULT 3",
+    "mines_cashout_min_steps INT DEFAULT 1",
+    "baucua_enabled TINYINT DEFAULT 1",
+    "blackjack_enabled TINYINT DEFAULT 1",
+    "hilo_enabled TINYINT DEFAULT 1",
+    "mines_enabled TINYINT DEFAULT 1"
 ];
 
 foreach ($new_columns as $col) {
@@ -37,8 +41,9 @@ foreach ($new_columns as $col) {
 
 // 1A. Xử lý lưu cài đặt hệ thống vòng quay
 if (isset($_POST['update_system_settings'])) {
-    $min = (int)$_POST['min_reward'];
-    $max = (int)$_POST['max_reward'];
+    $min = max(0, (int)$_POST['min_reward']);
+    $max = max(0, (int)$_POST['max_reward']);
+    if ($max < $min) { [$min, $max] = [$max, $min]; }
 
     $stmt = $pdo->prepare("UPDATE settings SET min_reward = ?, max_reward = ? WHERE id = 1");
     $stmt->execute([$min, $max]);
@@ -51,17 +56,22 @@ if (isset($_POST['update_system_settings'])) {
 // 1B. Xử lý lưu cài đặt minigame
 if (isset($_POST['update_minigame_settings'])) {
     try {
-        $m_bombs = (int)($_POST['mines_bombs'] ?? 3);
-        $bc_mul = (float)($_POST['baucua_multiplier'] ?? 1.0);
-        $bj_mul = (float)($_POST['blackjack_multiplier'] ?? 2.0);
-        $hilo_mul = (float)($_POST['hilo_multiplier'] ?? 1.2);
+        $m_bombs = max(1, min(24, (int)($_POST['mines_bombs'] ?? 3)));
+        $bc_mul = max(0.01, min(100, (float)($_POST['baucua_multiplier'] ?? 1.0)));
+        $bj_mul = max(0.01, min(100, (float)($_POST['blackjack_multiplier'] ?? 2.0)));
+        $hilo_mul = max(0.01, min(100, (float)($_POST['hilo_multiplier'] ?? 1.2)));
 
-        // Lấy thông số Win Rate và Tiền cộng dò mìn
-        $bc_wr = (int)($_POST['baucua_win_rate'] ?? 40);
-        $bj_wr = (int)($_POST['blackjack_win_rate'] ?? 40);
-        $hilo_wr = (int)($_POST['hilo_win_rate'] ?? 40);
-        $mines_wr = (int)($_POST['mines_win_rate'] ?? 40);
-        $mines_mul = (float)($_POST['mines_multiplier'] ?? 1.2); // Thay đổi ở đây
+        // Lấy thông số hệ số / giới hạn game. Kết quả game luôn random tự nhiên, không dùng tỷ lệ ép thắng/thua.
+        $mines_mul = max(0.01, min(100, (float)($_POST['mines_multiplier'] ?? 1.2)));
+        $min_bet = max(0, (int)($_POST['minigame_min_bet'] ?? 1000));
+        $max_bet = max(0, (int)($_POST['minigame_max_bet'] ?? 1000000));
+        if ($max_bet > 0 && $max_bet < $min_bet) { [$min_bet, $max_bet] = [$max_bet, $min_bet]; }
+        $bc_doors = max(1, min(5, (int)($_POST['baucua_max_doors'] ?? 3)));
+        $mines_cashout_steps = max(0, min(24, (int)($_POST['mines_cashout_min_steps'] ?? 1)));
+        $bc_enabled = isset($_POST['baucua_enabled']) ? 1 : 0;
+        $bj_enabled = isset($_POST['blackjack_enabled']) ? 1 : 0;
+        $hilo_enabled = isset($_POST['hilo_enabled']) ? 1 : 0;
+        $mines_enabled = isset($_POST['mines_enabled']) ? 1 : 0;
 
         // 1. Kiểm tra xem bảng settings đã có dòng id = 1 chưa.
         $check = $pdo->query("SELECT id FROM settings WHERE id = 1")->fetch();
@@ -71,12 +81,13 @@ if (isset($_POST['update_minigame_settings'])) {
 
         // 2. Chạy lệnh Update cấu hình
         $stmt = $pdo->prepare("UPDATE settings SET 
-            mines_bombs = ?, baucua_multiplier = ?, blackjack_multiplier = ?, hilo_multiplier = ?, 
-            baucua_win_rate = ?, blackjack_win_rate = ?, hilo_win_rate = ?, mines_win_rate = ?, mines_multiplier = ? 
+            mines_bombs = ?, baucua_multiplier = ?, blackjack_multiplier = ?, hilo_multiplier = ?, mines_multiplier = ?,
+            minigame_min_bet = ?, minigame_max_bet = ?, baucua_max_doors = ?, mines_cashout_min_steps = ?,
+            baucua_enabled = ?, blackjack_enabled = ?, hilo_enabled = ?, mines_enabled = ?
             WHERE id = 1");
-        $stmt->execute([$m_bombs, $bc_mul, $bj_mul, $hilo_mul, $bc_wr, $bj_wr, $hilo_wr, $mines_wr, $mines_mul]); // Đổi biến cuối thành $mines_mul
+        $stmt->execute([$m_bombs, $bc_mul, $bj_mul, $hilo_mul, $mines_mul, $min_bet, $max_bet, $bc_doors, $mines_cashout_steps, $bc_enabled, $bj_enabled, $hilo_enabled, $mines_enabled]);
 
-        $_SESSION['msg'] = "✅ Đã cập nhật cấu hình Minigame!";
+        $_SESSION['msg'] = "✅ Đã cập nhật cấu hình Minigame! Kết quả các game đang chạy ngẫu nhiên tự nhiên.";
     } catch (Exception $e) {
         // Bắt lỗi SQL nếu có và in ra màn hình để Admin dễ sửa
         $_SESSION['msg'] = "❌ Lỗi lưu cấu hình: " . $e->getMessage();
@@ -173,6 +184,8 @@ if (isset($_POST['add_mission'])) {
     $reward = (int)$_POST['reward_spins'];
     $mapping = ['baucua' => 'baucua_count', 'blackjack' => 'blackjack_count', 'hilo' => 'hilo_count', 'mines' => 'mines_count'];
     $key = $mapping[$game_type] ?? 'baucua_count';
+    $target = max(1, $target);
+    $reward = max(0, $reward);
     $pdo->prepare("INSERT INTO mission_settings (mission_name, mission_key, target_count, reward_spins) VALUES (?, ?, ?, ?)")->execute([$name, $key, $target, $reward]);
     try {
         $pdo->exec("ALTER TABLE users ADD COLUMN `$key` INT DEFAULT 0");
@@ -184,8 +197,8 @@ if (isset($_POST['add_mission'])) {
 }
 if (isset($_POST['update_mission'])) {
     $m_id = (int)$_POST['m_id'];
-    $target = (int)$_POST['target_count'];
-    $reward = (int)$_POST['reward_spins'];
+    $target = max(1, (int)$_POST['target_count']);
+    $reward = max(0, (int)$_POST['reward_spins']);
     $pdo->prepare("UPDATE mission_settings SET target_count = ?, reward_spins = ? WHERE id = ?")->execute([$target, $reward, $m_id]);
     $_SESSION['msg'] = "✅ Đã cập nhật cấu hình nhiệm vụ!";
     header("Location: admin.php");
@@ -303,6 +316,8 @@ $pending_gifts = $pdo->query("SELECT COUNT(*) FROM user_gifts WHERE status='pend
 </head>
 
 <body class="bg-slate-50 min-h-screen flex text-slate-800 font-sans">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
 
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3"></div>
 
@@ -739,27 +754,45 @@ $pending_gifts = $pdo->query("SELECT COUNT(*) FROM user_gifts WHERE status='pend
                     <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 mt-6">
                         <h2 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2">🎮 Cài đặt Minigame </h2>
                         <form method="POST">
+                            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+                                <h3 class="font-bold text-sm text-blue-800 mb-3">🛡️ Luật cược chung</h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">Cược tối thiểu mỗi ván (VNĐ)</label>
+                                        <input type="number" name="minigame_min_bet" min="0" value="<?= $settings['minigame_min_bet'] ?? 1000 ?>"
+                                            class="w-full px-3 py-2 border rounded-lg text-sm font-bold">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-slate-500 mb-1">Cược tối đa mỗi ván (VNĐ, 0 = không giới hạn)</label>
+                                        <input type="number" name="minigame_max_bet" min="0" value="<?= $settings['minigame_max_bet'] ?? 1000000 ?>"
+                                            class="w-full px-3 py-2 border rounded-lg text-sm font-bold">
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-2">Kết quả các game được random tự nhiên theo bài/xúc xắc/bàn mìn. Admin chỉ quản lý bật/tắt, min/max cược, hệ số trả thưởng và giới hạn gameplay; không còn tỷ lệ ép thắng/thua.</p>
+                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <h3 class="font-bold text-sm text-slate-700 mb-3">🎲 Bầu Cua</h3>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">Tỷ lệ User thắng
-                                        (%)</label>
-                                    <input type="number" name="baucua_win_rate"
-                                        value="<?= $settings['baucua_win_rate'] ?? 40 ?>" min="0" max="100"
-                                        class="w-full px-3 py-2 border rounded-lg text-sm text-blue-600 font-bold mb-2">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="font-bold text-sm text-slate-700">🎲 Bầu Cua</h3>
+                                        <label class="text-xs font-bold"><input type="checkbox" name="baucua_enabled" value="1" <?= (int)($settings['baucua_enabled'] ?? 1) === 1 ? 'checked' : '' ?>> Bật</label>
+                                    </div>
+
                                     <label class="block text-xs font-bold text-slate-500 mb-1">Hệ số nhân</label>
                                     <input type="number" step="0.1" name="baucua_multiplier"
                                         value="<?= $settings['baucua_multiplier'] ?? 1.0 ?>"
+                                        class="w-full px-3 py-2 border rounded-lg text-sm mb-2">
+                                    <label class="block text-xs font-bold text-slate-500 mb-1">Số cửa user được cược tối đa (1-5)</label>
+                                    <input type="number" name="baucua_max_doors" min="1" max="5"
+                                        value="<?= $settings['baucua_max_doors'] ?? 3 ?>"
                                         class="w-full px-3 py-2 border rounded-lg text-sm">
                                 </div>
 
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <h3 class="font-bold text-sm text-slate-700 mb-3">🃏 Xì Dách</h3>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">Tỷ lệ User thắng
-                                        (%)</label>
-                                    <input type="number" name="blackjack_win_rate"
-                                        value="<?= $settings['blackjack_win_rate'] ?? 40 ?>" min="0" max="100"
-                                        class="w-full px-3 py-2 border rounded-lg text-sm text-emerald-600 font-bold mb-2">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="font-bold text-sm text-slate-700">🃏 Xì Dách</h3>
+                                        <label class="text-xs font-bold"><input type="checkbox" name="blackjack_enabled" value="1" <?= (int)($settings['blackjack_enabled'] ?? 1) === 1 ? 'checked' : '' ?>> Bật</label>
+                                    </div>
+
                                     <label class="block text-xs font-bold text-slate-500 mb-1">Hệ số trả thưởng</label>
                                     <input type="number" step="0.1" name="blackjack_multiplier"
                                         value="<?= $settings['blackjack_multiplier'] ?? 2.0 ?>"
@@ -767,12 +800,11 @@ $pending_gifts = $pdo->query("SELECT COUNT(*) FROM user_gifts WHERE status='pend
                                 </div>
 
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <h3 class="font-bold text-sm text-slate-700 mb-3">👆👇 Hi-Lo</h3>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">Tỷ lệ User thắng
-                                        (%)</label>
-                                    <input type="number" name="hilo_win_rate"
-                                        value="<?= $settings['hilo_win_rate'] ?? 40 ?>" min="0" max="100"
-                                        class="w-full px-3 py-2 border rounded-lg text-sm text-indigo-600 font-bold mb-2">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="font-bold text-sm text-slate-700">👆👇 Hi-Lo</h3>
+                                        <label class="text-xs font-bold"><input type="checkbox" name="hilo_enabled" value="1" <?= (int)($settings['hilo_enabled'] ?? 1) === 1 ? 'checked' : '' ?>> Bật</label>
+                                    </div>
+
                                     <label class="block text-xs font-bold text-slate-500 mb-1">Hệ số nhân / lần
                                         lật</label>
                                     <input type="number" step="0.01" name="hilo_multiplier"
@@ -781,12 +813,11 @@ $pending_gifts = $pdo->query("SELECT COUNT(*) FROM user_gifts WHERE status='pend
                                 </div>
 
                                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                    <h3 class="font-bold text-sm text-slate-700 mb-3">💣 Dò Mìn</h3>
-                                    <label class="block text-xs font-bold text-slate-500 mb-1">Tỷ lệ User sống sót mỗi
-                                        bước (%)</label>
-                                    <input type="number" name="mines_win_rate"
-                                        value="<?= $settings['mines_win_rate'] ?? 40 ?>" min="0" max="100"
-                                        class="w-full px-3 py-2 border rounded-lg text-sm text-rose-600 font-bold mb-2">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h3 class="font-bold text-sm text-slate-700">💣 Dò Mìn</h3>
+                                        <label class="text-xs font-bold"><input type="checkbox" name="mines_enabled" value="1" <?= (int)($settings['mines_enabled'] ?? 1) === 1 ? 'checked' : '' ?>> Bật</label>
+                                    </div>
+
                                     <div class="grid grid-cols-2 gap-2">
                                         <div>
                                             <label class="block text-xs font-bold text-slate-500 mb-1">Số Mìn
@@ -803,6 +834,10 @@ $pending_gifts = $pdo->query("SELECT COUNT(*) FROM user_gifts WHERE status='pend
                                                 class="w-full px-3 py-2 border rounded-lg text-sm">
                                         </div>
                                     </div>
+                                    <label class="block text-xs font-bold text-slate-500 mb-1 mt-2">Số bước tối thiểu mới được chốt lời</label>
+                                    <input type="number" name="mines_cashout_min_steps" min="0" max="24"
+                                        value="<?= $settings['mines_cashout_min_steps'] ?? 1 ?>"
+                                        class="w-full px-3 py-2 border rounded-lg text-sm">
                                 </div>
                             </div>
                             <button type="submit" name="update_minigame_settings"

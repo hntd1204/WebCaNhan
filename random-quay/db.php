@@ -2,34 +2,45 @@
 // Thiết lập múi giờ Việt Nam
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
-$host = 'localhost';
-$dbname = 'Random_quay'; // Đổi thành tên DB của bạn
-$username = 'root';
-$password = '';
+require_once __DIR__ . '/../config/database.php';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // ĐÃ BỎ LOGIC RESET SỐ DƯ VỀ 0 MỖI NGÀY Ở ĐÂY
-
-} catch (PDOException $e) {
-    die("Lỗi kết nối CSDL: " . $e->getMessage());
+// Bổ sung cột cấu hình cần thiết. Mỗi lệnh tách riêng để cột nào tồn tại rồi thì bỏ qua cột đó.
+$schemaColumns = [
+    'settings' => [
+        'baucua_multiplier FLOAT DEFAULT 1',
+        'blackjack_multiplier FLOAT DEFAULT 2',
+        'hilo_multiplier FLOAT DEFAULT 1.2',
+        'mines_multiplier FLOAT DEFAULT 1.2',
+        'mines_bombs INT DEFAULT 3',
+        'minigame_min_bet INT DEFAULT 1000',
+        'minigame_max_bet INT DEFAULT 1000000',
+        'baucua_max_doors INT DEFAULT 3',
+        'mines_cashout_min_steps INT DEFAULT 1',
+        'baucua_enabled TINYINT DEFAULT 1',
+        'blackjack_enabled TINYINT DEFAULT 1',
+        'hilo_enabled TINYINT DEFAULT 1',
+        'mines_enabled TINYINT DEFAULT 1'
+    ],
+    'users' => [
+        'baucua_count INT DEFAULT 0',
+        'blackjack_count INT DEFAULT 0',
+        'hilo_count INT DEFAULT 0',
+        'mines_count INT DEFAULT 0',
+        'last_reset_date DATE DEFAULT NULL'
+    ]
+];
+foreach ($schemaColumns as $table => $columns) {
+    foreach ($columns as $col) {
+        try { $pdo->exec("ALTER TABLE `$table` ADD COLUMN $col"); } catch (Exception $e) {}
+    }
 }
-
+try { $pdo->exec("INSERT IGNORE INTO settings (id) VALUES (1)"); } catch (Exception $e) {}
 // --- THÊM LOGIC RESET NHIỆM VỤ QUA NGÀY MỚI ---
 if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role'] === 'user') {
     $uid = $_SESSION['user_id'];
     $today = date('Y-m-d');
 
-    // 1. Tự động tạo cột last_reset_date nếu chưa có
-    try {
-        $pdo->exec("ALTER TABLE users ADD COLUMN last_reset_date DATE DEFAULT NULL");
-    } catch (Exception $e) {
-        // Bỏ qua lỗi nếu cột đã tồn tại
-    }
-
-    // 2. Kiểm tra xem hôm nay đã reset chưa
+    // Kiểm tra xem hôm nay đã reset chưa
     try {
         $stmt = $pdo->prepare("SELECT last_reset_date FROM users WHERE id = ?");
         $stmt->execute([$uid]);
@@ -42,6 +53,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['role']) && $_SESSION['role']
             if (!empty($missions)) {
                 $setClause = "";
                 foreach ($missions as $key) {
+                    if (!preg_match('/^[a-z0-9_]+$/', $key)) continue;
                     $setClause .= "`$key` = 0, "; // Reset số lần chơi về 0
                 }
                 $setClause .= "last_reset_date = ?"; // Cập nhật ngày reset là hôm nay

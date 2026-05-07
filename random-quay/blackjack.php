@@ -1,6 +1,7 @@
 <?php
 session_start();
 require 'db.php';
+require_once 'app_helpers.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
     header("Location: login.php");
@@ -11,6 +12,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'user') {
 $stmt = $pdo->prepare("SELECT balance, blackjack_count FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch();
+$settings = fetch_settings($pdo);
+$gameConfig = public_game_config($settings, 'blackjack');
+$chipOptions = bet_chip_options((int)$gameConfig['min_bet'], (int)$gameConfig['max_bet']);
 
 // Lấy cấu hình nhiệm vụ Xì Dách từ Admin
 try {
@@ -57,6 +61,8 @@ $myHistories = $historyStmt->fetchAll();
 </head>
 
 <body class="bg-emerald-900 text-slate-100 min-h-screen">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <nav class="bg-slate-900/80 backdrop-blur-md px-4 py-3 flex justify-between items-center sticky top-0 z-50">
         <h1 class="text-xl font-bold text-white uppercase tracking-wider">Xì Dách</h1>
         <div class="flex items-center gap-3">
@@ -77,6 +83,9 @@ $myHistories = $historyStmt->fetchAll();
     </nav>
 
     <main class="max-w-4xl mx-auto mt-6 px-4 pb-24">
+        <div class="mb-4 rounded-xl border <?= $gameConfig['enabled'] ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-100' : 'border-red-500/40 bg-red-500/10 text-red-100' ?> p-3 text-xs font-bold">
+            <?= $gameConfig['enabled'] ? 'Cấu hình admin: cược ' . number_format($gameConfig['min_bet']) . 'đ - ' . (($gameConfig['max_bet'] ?? 0) > 0 ? number_format($gameConfig['max_bet']) . 'đ' : 'không giới hạn') . ', hệ số x' . $gameConfig['multiplier'] . '.' : 'Game đang tạm khóa bởi admin.' ?>
+        </div>
         <div class="bg-emerald-800 border-4 border-emerald-700 p-6 rounded-[2rem] shadow-2xl mb-8 relative">
             <div class="text-center mb-2 text-emerald-300 font-bold text-xs tracking-widest uppercase">Nhà Cái <span
                     id="dealerScore" class="hidden ml-2 bg-emerald-900 px-2 py-0.5 rounded">0</span></div>
@@ -91,14 +100,14 @@ $myHistories = $historyStmt->fetchAll();
         </div>
 
         <div id="betArea" class="mb-8 flex justify-center gap-3 overflow-x-auto no-scrollbar">
-            <?php foreach ([10000, 20000, 50000, 100000] as $chip): ?>
+            <?php foreach ($chipOptions as $chip): ?>
                 <button onclick="selectChip(<?= $chip ?>, this)"
-                    class="chip-btn shrink-0 w-14 h-14 rounded-full border-4 border-slate-600 bg-slate-800 font-bold text-xs <?= $chip == 10000 ? 'border-amber-400 text-amber-400' : '' ?>"><?= $chip / 1000 ?>K</button>
+                    class="chip-btn shrink-0 w-14 h-14 rounded-full border-4 border-slate-600 bg-slate-800 font-bold text-xs <?= $chip == $chipOptions[0] ? 'border-amber-400 text-amber-400' : '' ?>"><?= $chip >= 1000000 ? ($chip / 1000000) . "M" : ($chip / 1000) . "K" ?></button>
             <?php endforeach; ?>
         </div>
 
         <div class="flex justify-center gap-4 mb-8">
-            <button id="dealBtn" onclick="dealCards()"
+            <button id="dealBtn" onclick="dealCards()" <?= !$gameConfig['enabled'] ? 'disabled' : '' ?>
                 class="w-full sm:w-64 bg-amber-500 text-slate-900 text-lg font-black py-4 rounded-xl shadow-lg uppercase">Chia
                 Bài</button>
             <button id="hitBtn" onclick="action('hit')"
@@ -156,7 +165,8 @@ $myHistories = $historyStmt->fetchAll();
             lose: new Audio('https://www.soundjay.com/buttons/button-10.mp3')
         };
 
-        let currentBet = 10000;
+        let currentBet = <?= (int)$chipOptions[0] ?>;
+        const gameEnabled = <?= $gameConfig['enabled'] ? 'true' : 'false' ?>;
         let isPlaying = false;
 
         function selectChip(amount, el) {
@@ -181,6 +191,7 @@ $myHistories = $historyStmt->fetchAll();
 
         async function dealCards() {
             if (isPlaying) return;
+            if (!gameEnabled) { alert('Game đang tạm khóa bởi admin.'); return; }
             isPlaying = true;
             sounds.card.play();
 
@@ -230,6 +241,11 @@ $myHistories = $historyStmt->fetchAll();
                     body: formData
                 });
                 const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.error || 'Lỗi hệ thống');
+                    return;
+                }
 
                 document.getElementById('playerCards').innerHTML = data.player.map(c => renderCard(c)).join('');
                 document.getElementById('playerScore').innerText = data.player_score;

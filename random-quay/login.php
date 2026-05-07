@@ -40,6 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </head>
 
 <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl border border-slate-100 w-full max-w-md">
 
         <div class="text-center mb-6 sm:mb-8">
@@ -50,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php if ($error): ?>
         <div
             class="bg-red-50 border border-red-200 text-red-600 p-3 sm:p-4 rounded-xl mb-5 text-sm font-medium text-center">
-            <?= $error ?>
+            <?= htmlspecialchars($error) ?>
         </div>
         <?php endif; ?>
 

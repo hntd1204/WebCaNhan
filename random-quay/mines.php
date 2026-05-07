@@ -1,7 +1,8 @@
 <?php
 session_start();
 require 'db.php';
-if (!isset($_SESSION['user_id'])) {
+require_once 'app_helpers.php';
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'user') {
     header("Location: login.php");
     exit;
 }
@@ -15,6 +16,9 @@ try {
 $stmt = $pdo->prepare("SELECT balance, mines_count FROM users WHERE id = ?");
 $stmt->execute([$_SESSION['user_id']]);
 $user = $stmt->fetch();
+$settings = fetch_settings($pdo);
+$gameConfig = public_game_config($settings, 'mines');
+$chipOptions = bet_chip_options((int)$gameConfig['min_bet'], (int)$gameConfig['max_bet']);
 
 // Lấy cấu hình nhiệm vụ Dò mìn
 try {
@@ -55,6 +59,8 @@ try {
 </head>
 
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+<a href="../index.php" style="position:fixed;z-index:9999;top:12px;left:12px;background:#111827;color:#fff;text-decoration:none;padding:9px 13px;border-radius:999px;font:600 13px Arial, sans-serif;box-shadow:0 8px 20px rgba(0,0,0,.18)">← Trang chủ</a>
+
     <nav
         class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 px-4 py-3 flex justify-between items-center sticky top-0 z-50">
         <h1 class="text-xl font-bold text-emerald-400 uppercase tracking-wider">Dò Mìn</h1>
@@ -78,6 +84,9 @@ try {
     </nav>
 
     <main class="max-w-md mx-auto mt-6 px-4 pb-10">
+        <div class="mb-4 rounded-xl border <?= $gameConfig['enabled'] ? 'border-emerald-400/30 bg-emerald-500/10 text-emerald-100' : 'border-red-500/40 bg-red-500/10 text-red-100' ?> p-3 text-xs font-bold">
+            <?= $gameConfig['enabled'] ? 'Cấu hình admin: cược ' . number_format($gameConfig['min_bet']) . 'đ - ' . (($gameConfig['max_bet'] ?? 0) > 0 ? number_format($gameConfig['max_bet']) . 'đ' : 'không giới hạn') . ', ' . $gameConfig['mines_bombs'] . ' mìn, hệ số x' . $gameConfig['multiplier'] . ', chốt từ ' . $gameConfig['mines_cashout_min_steps'] . ' bước.' : 'Game đang tạm khóa bởi admin.' ?>
+        </div>
         <div class="bg-slate-800 border-2 border-slate-700 p-6 rounded-3xl shadow-2xl mb-6 relative">
             <div class="flex justify-between items-center mb-6 bg-slate-900 p-3 rounded-xl border border-slate-700">
                 <div class="text-slate-400 text-xs font-bold uppercase">Tiền Thưởng<br>
@@ -99,12 +108,11 @@ try {
             <div id="controls" class="space-y-3">
                 <select id="betAmount"
                     class="w-full p-4 rounded-xl bg-slate-900 border border-slate-700 text-white font-bold outline-none focus:border-emerald-500 transition">
-                    <option value="10000">Cược 10.000đ</option>
-                    <option value="20000">Cược 20.000đ</option>
-                    <option value="50000">Cược 50.000đ</option>
-                    <option value="100000">Cược 100.000đ</option>
+                    <?php foreach ($chipOptions as $chip): ?>
+                    <option value="<?= $chip ?>">Cược <?= number_format($chip) ?>đ</option>
+                    <?php endforeach; ?>
                 </select>
-                <button id="startBtn" onclick="startGame()"
+                <button id="startBtn" onclick="startGame()" <?= !$gameConfig['enabled'] ? 'disabled' : '' ?>
                     class="w-full bg-blue-600 hover:bg-blue-500 text-white py-4 rounded-xl font-black shadow-lg uppercase tracking-widest transition">BẮT
                     ĐẦU</button>
                 <button id="cashoutBtn" onclick="cashout()"
@@ -116,10 +124,24 @@ try {
 
     <script>
         let isPlaying = false;
+        const gameEnabled = <?= $gameConfig['enabled'] ? 'true' : 'false' ?>;
         let isProcessing = false; // Cờ chặn spam click
+
+
+        function updateMission(mission) {
+            if (!mission) return;
+            const progressSpan = document.getElementById('missionProgress');
+            if (progressSpan && mission.current !== undefined) {
+                progressSpan.innerText = `${mission.current}/${mission.target ?? mission.current}`;
+            }
+            if (mission.rewarded) {
+                alert("🎁 Chúc mừng! Bạn đã hoàn thành nhiệm vụ Dò Mìn và nhận được lượt quay miễn phí!");
+            }
+        }
 
         async function startGame() {
             if (isProcessing) return;
+            if (!gameEnabled) { alert('Game đang tạm khóa bởi admin.'); return; }
             isProcessing = true; // Khóa thao tác
 
             const bet = document.getElementById('betAmount').value;
@@ -186,7 +208,14 @@ try {
                 }).then(r => r.json());
                 btn.classList.add('tile-enter');
 
+                if (!res.success) {
+                    btn.disabled = false;
+                    alert(res.error || 'Lỗi hệ thống');
+                    return;
+                }
+
                 if (res.is_bomb) {
+                    updateMission(res.mission);
                     isPlaying = false;
                     btn.innerHTML = '💣';
                     btn.classList.replace('bg-slate-700', 'bg-rose-500');
@@ -219,6 +248,7 @@ try {
                 }).then(r => r.json());
 
                 if (res.success) {
+                    updateMission(res.mission);
                     document.getElementById('balance').innerText = Number(res.balance).toLocaleString('vi-VN');
                     document.getElementById('msg').innerHTML =
                         `<span class="text-emerald-400">Đã chốt: +${Number(res.winnings).toLocaleString('vi-VN')}đ</span>`;
